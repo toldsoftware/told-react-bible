@@ -13,7 +13,7 @@ export const SettingsPage = (props: { store: Store }) => storeComp(() => ({
     accountMessage: `accessToken = '${(props.store.account.getFacebookAccessToken() || '').substr(0, 10) + '...'}'`,
     platform: RX.Platform.getType(),
 }), (state) => (
-    <PageLayout store={props.store} postsStore={props.store}>
+    <PageLayout store={props.store}>
         <RX.View style={styles.page}>
             {!!state.loginError && <RX.Text style={styles.warning_text}>{state.loginError}</RX.Text>}
 

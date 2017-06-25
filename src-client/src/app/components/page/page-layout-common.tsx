@@ -12,7 +12,7 @@ import { Debug } from '../common/utils/debug';
 import { SearchIcon } from "../common/icons/search";
 import { ClearIcon } from "../common/icons/clear";
 import { FeedbackButton } from "../smart/feedbackButton";
-import { PageName } from "../pages/page-names";
+import { PageName, PageTabList } from "../pages/page-names";
 import { PageIcon } from "../pages/page-selector";
 
 export interface PostsStoreProvider {
@@ -26,8 +26,9 @@ export interface PostsStoreProvider {
 export const TabBar = (props: { store: Store }) => {
     return (
         <RX.View style={[styles.tabBar]} >
-            <PageTab name='Newsfeed' store={props.store} />
-            <PageTab name='Settings' store={props.store} />
+            {PageTabList.map(x=>(
+                <PageTab name={x} store={props.store} />
+            ))}
         </RX.View>
     );
 };

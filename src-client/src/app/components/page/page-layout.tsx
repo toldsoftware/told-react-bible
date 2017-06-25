@@ -5,12 +5,12 @@ import { MainLayout } from '../common/layout/main-layout';
 import { Store } from "../../store/store";
 import { HeaderBar, PostsStoreProvider, TabBar } from './page-layout-common';
 
-export const PageLayout = (props: { children?: any, store: Store, postsStore: PostsStoreProvider, onScrollReachEnd?: () => void }) => {
+export const PageLayout = (props: { children?: any, store: Store, postsStore?: PostsStoreProvider, onScrollReachEnd?: () => void }) => {
 
     return (
         <MainLayout
             backgroundColor={colors.back_page}
-            headerContent={<HeaderBar store={props.postsStore} />}
+            headerContent={<HeaderBar store={props.postsStore || props.store} />}
             footerContent={<TabBar store={props.store} />}
             footerHeight={sizes.footer_height}
             onScrollReachEnd={props.onScrollReachEnd}
