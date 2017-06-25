@@ -6,12 +6,14 @@ import { LocalIcon } from '../common/icons/local';
 import { DirectoryIcon } from '../common/icons/directory';
 import { HomeIcon } from '../common/icons/home';
 import { MenuIcon } from '../common/icons/menu';
-import { Store, PageName } from '../../store/store';
+import { Store } from '../../store/store';
 import { storeComp } from '../common/store-component-base';
 import { Debug } from '../common/utils/debug';
 import { SearchIcon } from "../common/icons/search";
 import { ClearIcon } from "../common/icons/clear";
 import { FeedbackButton } from "../smart/feedbackButton";
+import { PageName } from "../pages/page-names";
+import { PageIcon } from "../pages/page-selector";
 
 export interface PostsStoreProvider {
     getIsLoading(): boolean;
@@ -25,7 +27,7 @@ export const TabBar = (props: { store: Store }) => {
     return (
         <RX.View style={[styles.tabBar]} >
             <PageTab name='Newsfeed' store={props.store} />
-            <PageTab name='Home' store={props.store} />
+            <PageTab name='Settings' store={props.store} />
         </RX.View>
     );
 };
@@ -46,10 +48,9 @@ const PageTab = (props: { name: PageName, store: Store, title?: string }) => sto
     const buttonStyle = props.name === active ? styles.tab_button_active : styles.tab_button;
     const textStyle = props.name === active ? styles.tab_text_active : styles.tab_text;
     const iconStyle = props.name === active ? styles.tabIcon_active : styles.tabIcon;
-    const icon =
-        props.name === 'Newsfeed' ? <NewsIcon style={iconStyle} />
-            : <MenuIcon style={iconStyle} />
-        ;
+    const icon = (
+        <PageIcon pageName={props.name} iconStyle={iconStyle} />
+    );
 
     return (
         <RX.Button style={buttonStyle} onPress={onPress}>
@@ -97,7 +98,7 @@ export const MiniLoader = (props: { store: PostsStoreProvider }) => storeComp(()
 
 export const AppIconImage = () => (
     <RX.View style={styles.headerBar_appIconImage_view}>
-        <RX.Image style={styles.headerBar_appIconImage} source='/static/images/icon_128.png'></RX.Image>
+        <RX.Image style={styles.headerBar_appIconImage} source='/static/images/icon_24.png'></RX.Image>
     </RX.View>
 );
 

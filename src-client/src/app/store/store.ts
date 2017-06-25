@@ -4,8 +4,7 @@ import { delay, isMatch } from './helpers';
 import { AccountStore } from './account-store';
 import { facebookClient } from '../server-access/facebook-client';
 import { NewsFeedStore } from "./news-feed-store";
-
-export type PageName = 'Empty' | 'Newsfeed' | 'Home';
+import { PageName } from "../components/pages/page-names";
 
 @AutoSubscribeStore
 export class StoreClass extends StoreBase {
@@ -18,7 +17,7 @@ export class StoreClass extends StoreBase {
     _isLoading = true;
     _isLoadingChangeId = 0;
 
-    @autoDeviceStorage('Home')
+    @autoDeviceStorage('Settings')
     _page: PageName;
 
     constructor() {

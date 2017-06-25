@@ -1,12 +1,13 @@
 import * as RX from 'reactxp';
-import { PageLayout } from './page-layout';
-import { Store, PageName } from '../../store/store';
+import { Store } from '../../store/store';
 import { styles } from "../../styles";
 import { IconDemo } from "../common/icons/icon-demo";
 import { FacebookLogin } from "../common/account/facebook-login";
 import { storeComp } from "../common/store-component-base";
+import { PageName } from "../pages/page-names";
+import { PageLayout } from "../page/page-layout";
 
-export const HomePage = (props: { store: Store }) => storeComp(() => ({
+export const SettingsPage = (props: { store: Store }) => storeComp(() => ({
     loginError: props.store.account.getError(),
     isLoggedIn: props.store.account.getIsFacebookLoggedIn(),
     accountMessage: `accessToken = '${(props.store.account.getFacebookAccessToken() || '').substr(0, 10) + '...'}'`,

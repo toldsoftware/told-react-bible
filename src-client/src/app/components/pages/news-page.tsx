@@ -1,11 +1,11 @@
 import * as RX from 'reactxp';
 import { storeComp } from '../common/store-component-base';
-import { PageLayout } from './page-layout';
 import { Store } from '../../store/store';
 import { styles } from "../../styles";
 import { PostList } from "../posts/post-list";
 import { FacebookLogin } from "../common/account/facebook-login";
-import { PostsBaseList } from "./posts-base-list";
+import { PostsBaseList } from "../page/posts-base-list";
+import { PageLayout } from "../page/page-layout";
 
 export const NewsPage = (props: { store: Store }) => (
     <PageLayout store={props.store} postsStore={props.store.newsFeed} onScrollReachEnd={props.store.newsFeed.loadMorePosts}>
