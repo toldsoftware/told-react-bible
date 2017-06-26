@@ -19,7 +19,7 @@ export class StoreClass extends StoreBase {
     _isLoading = true;
     _isLoadingChangeId = 0;
 
-    @autoDeviceStorage('Empty')
+    @autoDeviceStorage('Interact')
     _page: PageName;
 
     constructor() {

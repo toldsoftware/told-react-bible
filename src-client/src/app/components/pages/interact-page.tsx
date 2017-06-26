@@ -8,7 +8,7 @@ import { BibleStore } from "../../store/bible-store";
 import { PassageChooser } from "../bible/passage-chooser";
 
 export const InteractPage = (props: { store: Store }) => (
-    <PageLayout store={props.store} postsStore={props.store.bibleStore}>
+    <PageLayout store={props.store} postsStore={props.store.bibleStore} shouldHideTabBar={true}>
         <RX.View style={styles.page}>
             <InteractView store={props.store} />
         </RX.View>
