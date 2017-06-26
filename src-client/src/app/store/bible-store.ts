@@ -27,6 +27,20 @@ export class BibleStoreClass extends StoreBase {
 
     _passage: Passage;
 
+    constructor() {
+        super();
+        setTimeout(() => {
+            this.ensureLoad();
+        });
+    }
+
+    private ensureLoad = async () => {
+        let val = null as any;
+        val = this._selectedBookKey;
+        val = this._selectedChapterNumber;
+        val = this._selectedVerseNumber;
+    };
+
     // @autoSubscribe
     // getPassageMetadata() {
 
