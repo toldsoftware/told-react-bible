@@ -6,7 +6,7 @@ import { MenuIcon } from "../common/icons/menu";
 import { IconStyle } from "../common/icons/icon-base";
 import { PageLayout } from "../page/page-layout";
 import { SettingsPage } from "./settings-page";
-import { NewsPage } from "./news-page";
+// import { NewsPage } from "./news-page";
 import { BookIcon } from "../common/icons/book";
 import { RocketIcon } from "../common/icons/rocket";
 import { InteractPage } from "./interact-page";

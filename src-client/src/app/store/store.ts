@@ -3,14 +3,16 @@ import { autoDeviceStorage } from '../extensions/storage/autoDeviceStorage';
 import { delay, isMatch } from './helpers';
 import { AccountStore } from './account-store';
 import { facebookClient } from '../server-access/facebook-client';
-import { NewsFeedStore } from "./news-feed-store";
+// import { NewsFeedStore } from "./news-feed-store";
 import { PageName } from "../components/pages/page-names";
+import { BibleStore } from "./bible-store";
 
 @AutoSubscribeStore
 export class StoreClass extends StoreBase {
 
-    newsFeed = NewsFeedStore;
+   // newsFeed = NewsFeedStore;
     account = AccountStore;
+    bibleStore = BibleStore;
 
     uiActions: { [key: string]: any } = [];
 

@@ -6,11 +6,20 @@ import { PostList } from "../posts/post-list";
 import { FacebookLogin } from "../common/account/facebook-login";
 import { PostsBaseList } from "../page/posts-base-list";
 import { PageLayout } from "../page/page-layout";
+import { PassageViewer } from "../bible/passage";
 
 export const InteractPage = (props: { store: Store }) => (
     <PageLayout store={props.store}>
         <RX.View style={styles.page}>
-            <RX.Text>Interact</RX.Text>
+            <InteractView store={props.store} />
         </RX.View>
     </PageLayout>
 );
+
+export const InteractView = (props: { store: Store }) => storeComp(() => ({
+    passage: props.store.bibleStore.getPassage(),
+}), (state) => (
+    <RX.View>
+        <PassageViewer passage={state.passage} />
+    </RX.View>
+));
