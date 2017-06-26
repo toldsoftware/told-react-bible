@@ -20,6 +20,6 @@ export const InteractView = (props: { store: Store }) => storeComp(() => ({
     passage: props.store.bibleStore.getPassage(),
 }), (state) => (
     <RX.View>
-        <PassageViewer passage={state.passage} />
+        <PassageViewer passage={state.passage} onPartDone={props.store.bibleStore.completePart} />
     </RX.View>
 ));

@@ -2,8 +2,10 @@ import { StoreBase, AutoSubscribeStore, autoSubscribe } from 'resub';
 
 import { autoDeviceStorage } from '../extensions/storage/autoDeviceStorage';
 import { FacebookAccess } from "../components/common/account/facebook-login";
-import { Passage, BibleMetadataData, BibleData } from "../components/bible/types";
+import { Passage, BibleMetadata, BibleData, PassagePart } from "../components/bible/types";
 import { PassagePartsGenerator } from "../components/bible/passage-parts-generator";
+import { downloadBibleChapterData, downloadBibleMetadata } from "../server-access/bible-data";
+import { delay } from "./helpers";
 
 @AutoSubscribeStore
 export class BibleStoreClass extends StoreBase {
@@ -12,7 +14,7 @@ export class BibleStoreClass extends StoreBase {
 
     _bibleData: BibleData;
 
-    _bibleMetadata: BibleMetadataData;
+    _bibleMetadata: BibleMetadata;
 
     @autoDeviceStorage(null, 'Bible')
     _selectedBookKey: string;
@@ -28,6 +30,13 @@ export class BibleStoreClass extends StoreBase {
     @autoSubscribe
     getPassageMetadata() {
 
+        if (!this._bibleMetadata) {
+            setTimeout(async () => {
+                this.downloadMetadata();
+                this.trigger();
+            });
+        }
+
         const bookMetadata = this._bibleMetadata && this._selectedBookKey && this._bibleMetadata.books.filter(x => x.bookID === this._selectedBookKey)[0];
         const chapterMetadata = bookMetadata && this._selectedChapterNumber && bookMetadata.chapters[this._selectedChapterNumber - 1];
 
@@ -40,7 +49,7 @@ export class BibleStoreClass extends StoreBase {
             chapterIndex: (this._selectedChapterNumber || 1) - 1,
             verseIndex: (this._selectedVerseNumber || 1) - 1,
 
-            books: this._bibleMetadata.books,
+            books: this._bibleMetadata && this._bibleMetadata.books,
             bookName: bookMetadata && bookMetadata.bookName,
             chapterCount: bookMetadata && bookMetadata.chapterCount,
             verseCount: chapterMetadata && chapterMetadata.verseCount,
@@ -71,26 +80,70 @@ export class BibleStoreClass extends StoreBase {
     getPassage() {
 
         if (!this._passage) {
-            this.generatePassage();
+            setTimeout(async () => {
+                await this.generatePassage();
+                this.trigger();
+
+                console.log('getPassage ASYNC END', { _passage: this._passage });
+            });
         }
 
-        return this._passage;
+        return this._passage || {
+            previousParts: [],
+            activeParts: [],
+            nextParts: [],
+        };
     }
+
+    completePart = async (part: PassagePart) => {
+        console.log('completePart', { part, _passage: this._passage });
+
+        part._isDone = true;
+        if (this._passage.activeParts.every(x => x._isDone || x.kind !== 'choice')) {
+            console.log('completePart Active Parts DONE', { part, _passage: this._passage });
+
+            await this.gotoAndGenerateNextPassage();
+            this.trigger();
+        }
+    };
 
     private _passageGenerator = new PassagePartsGenerator();
 
-    private generatePassage() {
+    private generatePassage = async () => {
+        console.log('generatePassage START', { _passage: this._passage });
+
+        if (!this._bibleMetadata) {
+            await this.downloadMetadata();
+        }
+
+        this._selectedBookKey = this._selectedBookKey || this._bibleMetadata.books[0].bookID;
+        this._selectedChapterNumber = this._selectedChapterNumber || 1;
+        this._selectedVerseNumber = this._selectedVerseNumber || 1;
+
+
         this._passage = this._passage || { previousParts: [], activeParts: [], nextParts: [] };
-        this._passage.previousParts = this._passageGenerator.createParts(this.getVerseDataAtOffset(-1), false);
-        this._passage.activeParts = this._passageGenerator.createParts(this.getVerseDataAtOffset(0), true);
-        this._passage.nextParts = this._passageGenerator.createParts(this.getVerseDataAtOffset(1), true);
+        this._passage.previousParts = this._passageGenerator.createParts(await this.getVerseDataAtOffset(-1), false);
+        this._passage.activeParts = this._passageGenerator.createParts(await this.getVerseDataAtOffset(0), true);
+        this._passage.nextParts = this._passageGenerator.createParts(await this.getVerseDataAtOffset(1), true);
+
+        // Cause a change detection
+        this._passage = { ...this._passage };
+
+        console.log('generatePassage END', { _passage: this._passage });
     }
 
-    private gotoAndGenerateNextPassage = () => {
+    private gotoAndGenerateNextPassage = async () => {
+        console.log('gotoAndGenerateNextPassage START', { _passage: this._passage });
+
         this.gotoNextVerseReference();
         this._passage.previousParts.push(...this._passage.activeParts);
         this._passage.activeParts = this._passage.nextParts;
-        this._passage.nextParts = this._passageGenerator.createParts(this.getVerseDataAtOffset(1), true);
+        this._passage.nextParts = this._passageGenerator.createParts(await this.getVerseDataAtOffset(1), true);
+
+        // Cause a change detection
+        this._passage = { ...this._passage };
+
+        console.log('gotoAndGenerateNextPassage END', { _passage: this._passage });
     };
 
     private gotoNextVerseReference = () => {
@@ -108,43 +161,92 @@ export class BibleStoreClass extends StoreBase {
         }
     };
 
-    private getVerseDataAtOffset = (verseOffset: number) => {
+    private getVerseDataAtOffset = async (verseOffset: number) => {
+        if (!this._bibleMetadata) {
+            await this.downloadMetadata();
+        }
+
         const m = this.getPassageMetadata();
+
+        console.log('getVerseDataAtOffset START', { getPassageMetadata: m });
+
 
         if (verseOffset >= 0) {
             if (m.verseIndex + verseOffset <= m.verseCount) {
-                return this.getVerseData(m.bookIndex, m.chapterIndex, m.verseIndex + verseOffset);
+                return await this.getVerseData(m.bookIndex, m.chapterIndex, m.verseIndex + verseOffset);
             }
 
             if (m.chapterIndex < m.chapterCount) {
-                return this.getVerseData(m.bookIndex, m.chapterIndex + 1, 0);
+                return await this.getVerseData(m.bookIndex, m.chapterIndex + 1, 0);
             }
 
+            console.warn('getVerseDataAtOffset: Past end of book');
             return null;
         }
         else {
             if (m.verseIndex + verseOffset >= 0) {
-                return this.getVerseData(m.bookIndex, m.chapterIndex, m.verseIndex + verseOffset);
+                return await this.getVerseData(m.bookIndex, m.chapterIndex, m.verseIndex + verseOffset);
             }
 
             if (m.chapterIndex > 0) {
                 const vCount = this._bibleMetadata.books[m.bookIndex].chapters[m.chapterIndex - 1].verseCount;
-                return this.getVerseData(m.bookIndex, m.chapterIndex - 1, vCount - 1);
+                return await this.getVerseData(m.bookIndex, m.chapterIndex - 1, vCount - 1);
             }
 
+            console.warn('getVerseDataAtOffset: Past beginning of book');
             return null;
         }
     };
 
-    private getVerseData = (bookIndex: number, chapterIndex: number, verseIndex: number) => {
+    private getVerseData = async (bookIndex: number, chapterIndex: number, verseIndex: number) => {
+
+        if (!this._bibleMetadata) {
+            await this.downloadMetadata();
+        }
+
+        const m = this._bibleMetadata;
+
+        console.log('getVerseData START', { _bibleData: this._bibleData, _bibleMetadata: this._bibleMetadata });
+
+        this._bibleData = this._bibleData || { books: [] };
+        this._bibleData.books[bookIndex] = this._bibleData.books[bookIndex] || { chapters: [], hasChapterDownloadStarted: [] };
+
+        if (this._bibleData.books[bookIndex].hasChapterDownloadStarted[chapterIndex]) {
+            while (!this._bibleData.books[bookIndex].chapters[chapterIndex]) {
+                await delay(500);
+            }
+        }
+
+        if (!this._bibleData.books[bookIndex].chapters[chapterIndex]) {
+            this._bibleData.books[bookIndex].hasChapterDownloadStarted[chapterIndex] = true;
+            this._bibleData.books[bookIndex].chapters[chapterIndex] =
+                await downloadBibleChapterData('WEB', bookIndex + 1, m.books[bookIndex].bookID, chapterIndex + 1);
+        }
+
+        console.log('getVerseData END', { _bibleData: this._bibleData, _bibleMetadata: this._bibleMetadata });
+
         return this._bibleData.books[bookIndex].chapters[chapterIndex].verses[verseIndex];
-        // return {
-        //     bookKey: this._bibleMetadata.books[bookIndex].bookID,
-        //     chapterNumber: chapterIndex + 1,
-        //     verseNumber: verseIndex + 1,
-        //     verseData: this._bibleData.books[bookIndex].chapters[chapterIndex].verses[verseIndex],
-        // }
     }
+
+    private _downloadMetadata_busy = false;
+    private downloadMetadata = async () => {
+        console.log('downloadMetadata START', { _bibleMetadata: this._bibleMetadata, _downloadMetadata_busy: this._downloadMetadata_busy });
+
+        while (!this._bibleMetadata && this._downloadMetadata_busy) {
+            await delay(500);
+            console.log('downloadMetadata DELAY', { _bibleMetadata: this._bibleMetadata, _downloadMetadata_busy: this._downloadMetadata_busy });
+        }
+
+        console.log('downloadMetadata CONTINUE', { _bibleMetadata: this._bibleMetadata, _downloadMetadata_busy: this._downloadMetadata_busy });
+
+        this._downloadMetadata_busy = true;
+        if (!this._bibleMetadata) {
+            this._bibleMetadata = await downloadBibleMetadata('WEB');
+            this._downloadMetadata_busy = false;
+        }
+
+        console.log('downloadMetadata END', { _bibleMetadata: this._bibleMetadata, _downloadMetadata_busy: this._downloadMetadata_busy });
+    };
 }
 
 export const BibleStore = new BibleStoreClass();

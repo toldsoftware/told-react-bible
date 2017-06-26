@@ -12,6 +12,8 @@ export interface PassagePart {
     text: string;
     choices?: PassagePartChoice[];
     correctChoice?: PassagePartChoice;
+
+    _isDone?: boolean;
 }
 
 export interface PassagePartChoice {
@@ -23,44 +25,46 @@ export interface PassagePartChoice {
 
 
 // Data
-export interface BibleMetadataData {
+export interface BibleMetadata {
     translationID: string;
     translationName: string;
-    books: BookMetadataData[];
+    books: BookMetadata[];
 }
 
-export interface BookMetadataData {
+export interface BookMetadata {
     bookIndex: number;
     bookID: string;
     bookName: string;
     chapterCount: number;
-    chapters: ChapterMetadataData[];
+    chapters: ChapterMetadata[];
 }
 
-export interface ChapterMetadataData {
+export interface ChapterMetadata {
     chapterID: string;
     verseCount: number;
 }
 
 // User Progress
-export interface BibleMetadata extends BibleMetadataData {
-    books: BookMetadata[];
+export interface BibleMetadata_UserProgress extends BibleMetadata {
+    books: BookMetadata_UserProgress[];
     ratioComplete: number;
     verseCount: number;
 }
-export interface BookMetadata extends BookMetadataData {
-    chapters: ChapterMetadata[];
+export interface BookMetadata_UserProgress extends BookMetadata {
+    chapters: ChapterMetadata_UserProgress[];
     ratioComplete: number;
     verseCount: number;
 }
-export interface ChapterMetadata extends ChapterMetadataData {
-    verses: VerseMetadata[];
+export interface ChapterMetadata_UserProgress extends ChapterMetadata {
+    verses: VerseMetadata_UserProgress[];
     ratioComplete: number;
 }
-export interface VerseMetadata {
-    verseID: string; isComplete: boolean;
+export interface VerseMetadata_UserProgress {
+    verseID: string;
+    isComplete: boolean;
 }
 
+// Bible Data
 export interface BibleData {
     books: BookData[];
 }

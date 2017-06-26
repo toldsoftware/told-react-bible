@@ -13,7 +13,7 @@ export class PassagePartsGenerator {
     private _iToChoice = MIN_CHOICE_SPACING + Math.ceil((MAX_CHOICE_SPACING - MIN_CHOICE_SPACING) * Math.random());
 
     createParts(verseData: VerseData, shouldMakeChoices = true): PassagePart[] {
-        if (!verseData.text.length) { return []; }
+        if (!verseData || !verseData.text.length) { return []; }
 
         let parts: PassagePart[] = [];
 

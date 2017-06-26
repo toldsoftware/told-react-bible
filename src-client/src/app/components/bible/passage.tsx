@@ -193,6 +193,8 @@ export class PassageChoicesViewer extends RX.Component<{
                 shiftAnimation.start();
             });
 
+            this.props.onPartDone();
+
         } else {
             s[i].isWrong = true;
         }
