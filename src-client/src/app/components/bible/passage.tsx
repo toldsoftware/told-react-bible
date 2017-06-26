@@ -18,9 +18,9 @@ const colors = {
 };
 
 const sizes = {
-    choiceHeight: 28,
-    lineHeight: 84,
-    choice_padding: 4,
+    choiceHeight: 36,
+    lineHeight: 108,
+    choice_padding: 8,
 };
 
 const styles = {
@@ -30,33 +30,41 @@ const styles = {
         alignItems: 'center',
     }),
     chapterMarker: RX.Styles.createTextStyle({
-        marginRight: 4,
+        marginRight: 2,
+        marginLeft: 2,
         fontSize: 48,
         color: colors.text_marker,
     }),
     verseMarker: RX.Styles.createTextStyle({
-        marginRight: 4,
+        marginRight: 2,
+        marginLeft: 2,
         fontSize: 14,
         color: colors.text_marker,
         paddingBottom: 6,
     }),
     textPart_view: RX.Styles.createViewStyle({
-        height: sizes.lineHeight,
+        // height: sizes.lineHeight,
         alignItems: 'center',
         justifyContent: 'center',
     }),
     textPart: RX.Styles.createTextStyle({
-        marginRight: 4,
+        marginRight: 2,
+        marginLeft: 2,
         fontSize: 16,
+    }),
+    choicesPart_wrapper: RX.Styles.createViewStyle({
+        height: sizes.lineHeight,
+        overflow: 'hidden',
     }),
     choicesPart: RX.Styles.createViewStyle({
         alignItems: 'stretch',
         justifyContent: 'center',
-        height: sizes.lineHeight,
+        // height: sizes.lineHeight,
     }),
     choice: RX.Styles.createViewStyle({
         height: sizes.choiceHeight - 2,
-        marginRight: 4,
+        marginRight: 2,
+        marginLeft: 2,
         marginTop: 1,
         marginBottom: 1,
     }),
@@ -182,16 +190,18 @@ export class PassageChoicesViewer extends RX.Component<{
         this.initState();
 
         return (
-            <RX.Animated.View style={[styles.choicesPart, this._shiftStyle]}>
-                {this.props.part.choices.map((x, i) => {
-                    const s = this.state.choiceStates[i];
-                    return (
-                        <RX.View style={styles.choice}>
-                            <PassageChoiceViewer part={x} {...s} onPress={() => this.selectChoice(i)} />
-                        </RX.View>
-                    );
-                })}
-            </RX.Animated.View>
+            <RX.View style={styles.choicesPart_wrapper}>
+                <RX.Animated.View style={[styles.choicesPart, this._shiftStyle]}>
+                    {this.props.part.choices.map((x, i) => {
+                        const s = this.state.choiceStates[i];
+                        return (
+                            <RX.View style={styles.choice}>
+                                <PassageChoiceViewer part={x} {...s} onPress={() => this.selectChoice(i)} />
+                            </RX.View>
+                        );
+                    })}
+                </RX.Animated.View>
+            </RX.View>
         );
     }
 }
