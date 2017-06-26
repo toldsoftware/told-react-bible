@@ -11,7 +11,7 @@ export class PassagePartsGenerator {
     }
 
     private _iToChoice = MIN_CHOICE_SPACING + Math.ceil((MAX_CHOICE_SPACING - MIN_CHOICE_SPACING) * Math.random());
-
+    private _nextKey = 0;
     createParts(verseData: VerseData, shouldMakeChoices = true): PassagePart[] {
         if (!verseData || !verseData.text.length) { return []; }
 
@@ -19,6 +19,7 @@ export class PassagePartsGenerator {
 
         if (verseData.verseID === "1") {
             parts.push({
+                _key: '' + this._nextKey++,
                 kind: 'chapterMarker',
                 isActive: false,
                 text: verseData.chapterID
@@ -26,6 +27,7 @@ export class PassagePartsGenerator {
         }
 
         parts.push({
+            _key: '' + this._nextKey++,
             kind: 'verseMarker',
             isActive: false,
             text: verseData.verseID
@@ -34,6 +36,7 @@ export class PassagePartsGenerator {
         const words = verseData.text.replace(/\n/g, ' \n ').replace(/ +/g, ' ').split(' ');
 
         let wordParts: PassagePart[] = words.map(w => ({
+            _key: '' + this._nextKey++,
             kind: w.indexOf('\n') >= 0 ? 'lineBreak' : 'text' as 'lineBreak' | 'text',
             isActive: false,
             text: w
@@ -53,6 +56,7 @@ export class PassagePartsGenerator {
 
                 const choices = getChoices(p.text, altWords);
                 const part: PassagePart = {
+                    _key: '' + this._nextKey++,
                     kind: 'choice',
                     isActive: false,
                     text: p.text,

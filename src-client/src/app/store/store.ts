@@ -10,7 +10,7 @@ import { BibleStore } from "./bible-store";
 @AutoSubscribeStore
 export class StoreClass extends StoreBase {
 
-   // newsFeed = NewsFeedStore;
+    // newsFeed = NewsFeedStore;
     account = AccountStore;
     bibleStore = BibleStore;
 
@@ -19,7 +19,7 @@ export class StoreClass extends StoreBase {
     _isLoading = true;
     _isLoadingChangeId = 0;
 
-    @autoDeviceStorage('Settings')
+    @autoDeviceStorage('Empty')
     _page: PageName;
 
     constructor() {

@@ -27,15 +27,29 @@ export class BibleStoreClass extends StoreBase {
 
     _passage: Passage;
 
-    @autoSubscribe
-    getPassageMetadata() {
+    // @autoSubscribe
+    // getPassageMetadata() {
 
+    //     if (!this._bibleMetadata) {
+    //         setTimeout(async () => {
+    //             this.downloadMetadata();
+    //             this.trigger();
+    //             console.log('getPassageMetadata ASYNC END TRIGGER');
+    //         });
+    //     }
+
+    //     return this.getPassageMetadata_inner();
+    // }
+
+    private getPassageMetadata_async = async () => {
         if (!this._bibleMetadata) {
-            setTimeout(async () => {
-                this.downloadMetadata();
-                this.trigger();
-            });
+            await this.downloadMetadata();
         }
+
+        return this.getPassageMetadata_inner();
+    }
+
+    private getPassageMetadata_inner() {
 
         const bookMetadata = this._bibleMetadata && this._selectedBookKey && this._bibleMetadata.books.filter(x => x.bookID === this._selectedBookKey)[0];
         const chapterMetadata = bookMetadata && this._selectedChapterNumber && bookMetadata.chapters[this._selectedChapterNumber - 1];
@@ -56,43 +70,47 @@ export class BibleStoreClass extends StoreBase {
         };
     }
 
-    selectBook = (bookKey: string) => {
-        this._selectedBookKey = bookKey;
-        this._selectedChapterNumber = null;
-        this._selectedVerseNumber = null;
-        this.trigger();
-    };
+    // selectBook = (bookKey: string) => {
+    //     this._selectedBookKey = bookKey;
+    //     this._selectedChapterNumber = null;
+    //     this._selectedVerseNumber = null;
+    //     this.trigger();
+    // };
 
-    selectChapter = (chapterNumber: number) => {
-        this._selectedChapterNumber = chapterNumber;
-        this._selectedVerseNumber = null;
-        this.trigger();
-    };
+    // selectChapter = (chapterNumber: number) => {
+    //     this._selectedChapterNumber = chapterNumber;
+    //     this._selectedVerseNumber = null;
+    //     this.trigger();
+    // };
 
-    selectVerse = (verseNumber: number) => {
-        this._selectedVerseNumber = verseNumber;
-        this._passage = null;
-        this.trigger();
-    };
-
+    // selectVerse = (verseNumber: number) => {
+    //     this._selectedVerseNumber = verseNumber;
+    //     this._passage = null;
+    //     this.trigger();
+    // };
 
     @autoSubscribe
     getPassage() {
+        console.log('getPassage START', { _passage: this._passage });
 
         if (!this._passage) {
+            this._passage = {
+                previousParts: [],
+                activeParts: [],
+                nextParts: [],
+            };
+
             setTimeout(async () => {
                 await this.generatePassage();
+                console.log('getPassage ASYNC TRIGGERING', { _passage: this._passage });
                 this.trigger();
-
                 console.log('getPassage ASYNC END', { _passage: this._passage });
             });
         }
 
-        return this._passage || {
-            previousParts: [],
-            activeParts: [],
-            nextParts: [],
-        };
+        console.log('getPassage END', { _passage: this._passage });
+
+        return this._passage;
     }
 
     completePart = async (part: PassagePart) => {
@@ -100,11 +118,15 @@ export class BibleStoreClass extends StoreBase {
 
         part._isDone = true;
         if (this._passage.activeParts.every(x => x._isDone || x.kind !== 'choice')) {
-            console.log('completePart Active Parts DONE', { part, _passage: this._passage });
+            console.log('completePart ActiveParts DONE', { part, _passage: this._passage });
 
             await this.gotoAndGenerateNextPassage();
             this.trigger();
+
+            console.log('completePart TRIGGER', { part, _passage: this._passage });
         }
+
+        console.log('completePart END', { part, _passage: this._passage });
     };
 
     private _passageGenerator = new PassagePartsGenerator();
@@ -120,14 +142,11 @@ export class BibleStoreClass extends StoreBase {
         this._selectedChapterNumber = this._selectedChapterNumber || 1;
         this._selectedVerseNumber = this._selectedVerseNumber || 1;
 
-
-        this._passage = this._passage || { previousParts: [], activeParts: [], nextParts: [] };
-        this._passage.previousParts = this._passageGenerator.createParts(await this.getVerseDataAtOffset(-1), false);
-        this._passage.activeParts = this._passageGenerator.createParts(await this.getVerseDataAtOffset(0), true);
-        this._passage.nextParts = this._passageGenerator.createParts(await this.getVerseDataAtOffset(1), true);
-
-        // Cause a change detection
-        this._passage = { ...this._passage };
+        this._passage = {
+            previousParts: this._passageGenerator.createParts(await this.getVerseDataAtOffset(-1), false),
+            activeParts: this._passageGenerator.createParts(await this.getVerseDataAtOffset(0), true),
+            nextParts: this._passageGenerator.createParts(await this.getVerseDataAtOffset(1), true)
+        };
 
         console.log('generatePassage END', { _passage: this._passage });
     }
@@ -135,19 +154,19 @@ export class BibleStoreClass extends StoreBase {
     private gotoAndGenerateNextPassage = async () => {
         console.log('gotoAndGenerateNextPassage START', { _passage: this._passage });
 
-        this.gotoNextVerseReference();
-        this._passage.previousParts.push(...this._passage.activeParts);
-        this._passage.activeParts = this._passage.nextParts;
-        this._passage.nextParts = this._passageGenerator.createParts(await this.getVerseDataAtOffset(1), true);
-
-        // Cause a change detection
-        this._passage = { ...this._passage };
+        await this.gotoNextVerseReference();
+        this._passage = {
+            //previousParts: [...this._passage.previousParts, ...this._passage.activeParts.map(x => { x._key += 'done'; return x; })],
+            previousParts: [...this._passage.previousParts, ...this._passage.activeParts],
+            activeParts: [...this._passage.nextParts],
+            nextParts: this._passageGenerator.createParts(await this.getVerseDataAtOffset(1), true)
+        };
 
         console.log('gotoAndGenerateNextPassage END', { _passage: this._passage });
     };
 
-    private gotoNextVerseReference = () => {
-        const m = this.getPassageMetadata();
+    private gotoNextVerseReference = async () => {
+        const m = await this.getPassageMetadata_async();
 
         if (m.verseIndex + 1 <= m.verseCount) {
             this._selectedVerseNumber++;
@@ -162,11 +181,7 @@ export class BibleStoreClass extends StoreBase {
     };
 
     private getVerseDataAtOffset = async (verseOffset: number) => {
-        if (!this._bibleMetadata) {
-            await this.downloadMetadata();
-        }
-
-        const m = this.getPassageMetadata();
+        const m = await this.getPassageMetadata_async();
 
         console.log('getVerseDataAtOffset START', { getPassageMetadata: m });
 

@@ -21,7 +21,7 @@ export class AccountStoreClass extends StoreBase {
 
     constructor() {
         super();
-        setTimeout(this.load, 5);
+        // setTimeout(this.load, 5);
     }
 
     setLoginError = (message: string, data: any) => {

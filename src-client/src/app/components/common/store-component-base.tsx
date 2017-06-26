@@ -12,7 +12,9 @@ class StoreComponentBase extends ComponentBase<{
 }, any> {
 
     protected _buildState(props: {}, initialBuild: boolean): any {
-        return this.props.buildStateCallback();
+        const s = this.props.buildStateCallback();
+        console.log('_buildState', { props, initialBuild, s });
+        return s;
     }
 
     render() {

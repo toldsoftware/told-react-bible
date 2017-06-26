@@ -1,12 +1,10 @@
 import * as RX from 'reactxp';
 import { storeComp } from '../common/store-component-base';
 import { Store } from '../../store/store';
-import { styles } from "../../styles";
-import { PostList } from "../posts/post-list";
-import { FacebookLogin } from "../common/account/facebook-login";
-import { PostsBaseList } from "../page/posts-base-list";
 import { PageLayout } from "../page/page-layout";
+import { styles } from "../../styles";
 import { PassageViewer } from "../bible/passage";
+import { BibleStore } from "../../store/bible-store";
 
 export const InteractPage = (props: { store: Store }) => (
     <PageLayout store={props.store}>
@@ -18,8 +16,13 @@ export const InteractPage = (props: { store: Store }) => (
 
 export const InteractView = (props: { store: Store }) => storeComp(() => ({
     passage: props.store.bibleStore.getPassage(),
-}), (state) => (
-    <RX.View>
-        <PassageViewer passage={state.passage} onPartDone={props.store.bibleStore.completePart} />
-    </RX.View>
-));
+}), (state) => {
+    // console.log('InteractView  RENDER', { state, passage: state.passage, active: state.passage.activeParts });
+    return (
+        <RX.View>
+            <PassageViewer passage={state.passage} onPartDone={props.store.bibleStore.completePart} />
+        </RX.View>
+    );
+});
+
+// TODO: Debug not refreshing UI (but state is changing)

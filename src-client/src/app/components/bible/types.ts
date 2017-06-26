@@ -13,6 +13,7 @@ export interface PassagePart {
     choices?: PassagePartChoice[];
     correctChoice?: PassagePartChoice;
 
+    _key: string;
     _isDone?: boolean;
 }
 
