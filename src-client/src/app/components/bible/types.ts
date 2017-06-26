@@ -26,7 +26,7 @@ export interface PassagePartChoice {
 export interface BibleMetadataData {
     translationID: string;
     translationName: string;
-    books: BookMetadata[];
+    books: BookMetadataData[];
 }
 
 export interface BookMetadataData {
@@ -34,7 +34,7 @@ export interface BookMetadataData {
     bookID: string;
     bookName: string;
     chapterCount: number;
-    chapters: ChapterMetadata[];
+    chapters: ChapterMetadataData[];
 }
 
 export interface ChapterMetadataData {
