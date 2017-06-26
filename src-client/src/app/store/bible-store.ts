@@ -12,7 +12,7 @@ export class BibleStoreClass extends StoreBase {
         parts: this._choiceGenerator.createParts({
             chapterID: '1',
             verseID: '1',
-            text: 'In the beginning, God created the heavens and the earth.'
+            text: 'In the beginning, God created the heavens and the earth. In the beginning, God created the heavens and the earth. In the beginning, God created the heavens and the earth. In the beginning, God created the heavens and the earth.'
         }, true)
     };
 
