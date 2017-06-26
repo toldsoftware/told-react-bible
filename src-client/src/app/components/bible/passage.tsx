@@ -7,6 +7,9 @@ const colors = {
     back_choice: '#387ef5',
     text_choice: '#FFFFFF',
 
+    back_choice_disabled: '#CCCCCC',
+    text_choice_disabled: '#000000',
+
     back_wrong: '#f53d3d',
     text_wrong: '#FFFFFF',
 
@@ -24,6 +27,9 @@ const sizes = {
 };
 
 const styles = {
+    inactive: RX.Styles.createViewStyle({
+        opacity: 0.75,
+    }),
     viewer: RX.Styles.createViewStyle({
         flexDirection: 'row',
         flexWrap: 'wrap',
@@ -76,6 +82,14 @@ const styles = {
         color: colors.text_choice,
         backgroundColor: colors.back_choice,
     }),
+    choice_disabled: RX.Styles.createTextStyle({
+        margin: 0,
+        padding: sizes.choice_padding,
+        fontSize: 16,
+        textAlign: 'center',
+        color: colors.text_choice_disabled,
+        backgroundColor: colors.back_choice_disabled,
+    }),
     choice_correct: RX.Styles.createTextStyle({
         margin: 0,
         padding: sizes.choice_padding,
@@ -108,26 +122,30 @@ const styles = {
 
 
 
-export const PassageViewer = (props: { passage: Passage }) => (
-    <RX.View style={styles.viewer}>
-        {props.passage.parts.map(x => <PassagePartViewer part={x} />)}
-    </RX.View>
-);
+export const PassageViewer = (props: { passage: Passage, onPartDone: (part: PassagePart) => void }) => {
 
-export const PassagePartViewer = (props: { part: PassagePart }) => {
+    return (
+        <RX.View style={styles.viewer}>
+            {props.passage.previousParts.map(x => <RX.View style={styles.inactive}><PassagePartViewer part={x} /></RX.View>)}
+            {props.passage.activeParts.map(x => <PassagePartViewer part={x} onPartDone={() => props.onPartDone(x)} />)}
+            {props.passage.nextParts.map(x => <RX.View style={styles.inactive}><PassagePartViewer part={x} /></RX.View>)}
+        </RX.View>
+    );
+};
+
+export const PassagePartViewer = (props: { part: PassagePart, onPartDone?: () => void }) => {
+
     switch (props.part.kind) {
         case 'chapterMarker': return (<RX.Text style={styles.chapterMarker}>{props.part.text}</RX.Text>);
         case 'verseMarker': return (<RX.Text style={styles.verseMarker}>{props.part.text}</RX.Text>);
-        case 'text': return (<RX.View style={styles.textPart_view}><RX.Text style={styles.textPart}>{props.part.text}</RX.Text></RX.View>);
-        case 'choice': return (<PassageChoicesViewer part={props.part} />);
+        case 'choice': return (<PassageChoicesViewer part={props.part} onPartDone={props.onPartDone} />);
+        case 'text': default: return (<RX.View style={styles.textPart_view}><RX.Text style={styles.textPart}>{props.part.text}</RX.Text></RX.View>);
     }
-    return (
-        <RX.Text>{props.part.kind} {props.part.text}</RX.Text>
-    );
 };
 
 export class PassageChoicesViewer extends RX.Component<{
     part: PassagePart,
+    onPartDone?: () => void
 }, {
         isCorrect: boolean,
         choiceStates: {
@@ -149,6 +167,9 @@ export class PassageChoicesViewer extends RX.Component<{
     };
 
     selectChoice = (i: number) => {
+        // Ignore if no onPartDone handler
+        if (!this.props.onPartDone) { return; }
+
         const s = this.state.choiceStates;
 
         const p = this.props.part.choices[i];
@@ -196,7 +217,7 @@ export class PassageChoicesViewer extends RX.Component<{
                         const s = this.state.choiceStates[i];
                         return (
                             <RX.View style={styles.choice}>
-                                <PassageChoiceViewer part={x} {...s} onPress={() => this.selectChoice(i)} />
+                                <PassageChoiceViewer part={x} {...s} onPress={() => this.selectChoice(i)} hasOnPartDoneHandler={!!this.props.onPartDone} />
                             </RX.View>
                         );
                     })}
@@ -206,7 +227,7 @@ export class PassageChoicesViewer extends RX.Component<{
     }
 }
 
-export const PassageChoiceViewer = (props: { part: PassagePartChoice, isCorrect: boolean, isWrong: boolean, isCollapsed: boolean, onPress: () => void }) => {
+export const PassageChoiceViewer = (props: { part: PassagePartChoice, isCorrect: boolean, isWrong: boolean, isCollapsed: boolean, onPress: () => void, hasOnPartDoneHandler: boolean }) => {
     if (props.isCorrect) {
         return <RX.Text style={styles.choice_correct}>{props.part.text}</RX.Text>
     } else if (props.isCollapsed && props.isWrong) {
@@ -215,8 +236,10 @@ export const PassageChoiceViewer = (props: { part: PassagePartChoice, isCorrect:
         return <RX.Text style={styles.choice_collapsed}>{props.part.text}</RX.Text>
     } else if (props.isWrong) {
         return <RX.Text style={styles.choice_wrong}>{props.part.text}</RX.Text>
-    } else {
+    } else if (props.hasOnPartDoneHandler) {
         return <RX.Button style={styles.choice_default} onPress={props.onPress}>{props.part.text}</RX.Button>
+    } else {
+        return <RX.Text style={styles.choice_disabled}>{props.part.text}</RX.Text>
     }
 }
 

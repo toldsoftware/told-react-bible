@@ -1,6 +1,8 @@
 // UI
 export interface Passage {
-    parts: PassagePart[];
+    previousParts: PassagePart[];
+    activeParts: PassagePart[];
+    nextParts: PassagePart[];
 }
 
 export interface PassagePart {
