@@ -7,7 +7,7 @@ export type PageName = 'Empty'
 
 export const PageTabList: PageName[] = [
     // 'Newsfeed',
-    'Read',
+    // 'Read',
     'Interact',
     'Settings',
 ];

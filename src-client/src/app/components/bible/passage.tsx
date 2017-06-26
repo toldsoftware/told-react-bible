@@ -2,6 +2,8 @@ import * as RX from 'reactxp';
 import { Passage, PassagePart, PassagePartChoice } from "./types";
 
 const colors = {
+    back_viewer: '#FFFFFF',
+
     text_marker: '#387ef5',
 
     back_choice: '#387ef5',
@@ -37,6 +39,8 @@ const styles = {
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'center',
+        backgroundColor: colors.back_viewer,
+        padding: 8,
     }),
     chapterMarker: RX.Styles.createTextStyle({
         marginRight: 2,

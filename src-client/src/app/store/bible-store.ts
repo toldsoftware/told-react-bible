@@ -10,6 +10,7 @@ import { delay } from "./helpers";
 @AutoSubscribeStore
 export class BibleStoreClass extends StoreBase {
 
+    _isLoading = false;
     // TODO: Download Metadata and Data
 
     _bibleData: BibleData;
@@ -41,19 +42,36 @@ export class BibleStoreClass extends StoreBase {
         val = this._selectedVerseNumber;
     };
 
-    // @autoSubscribe
-    // getPassageMetadata() {
+    @autoSubscribe
+    getIsLoading() {
+        return this._isLoading;
+    }
 
-    //     if (!this._bibleMetadata) {
-    //         setTimeout(async () => {
-    //             this.downloadMetadata();
-    //             this.trigger();
-    //             console.log('getPassageMetadata ASYNC END TRIGGER');
-    //         });
-    //     }
+    startLoading = () => {
+        this._isLoading = true;
+        this.trigger();
+    };
 
-    //     return this.getPassageMetadata_inner();
-    // }
+    endLoading = () => {
+        this._isLoading = false;
+        this.trigger();
+    };
+
+    @autoSubscribe
+    getPassageMetadata() {
+
+        if (!this._bibleMetadata) {
+            setTimeout(async () => {
+                this.startLoading();
+                await this.getPassageMetadata_async();
+                this.endLoading();
+
+                console.log('getPassageMetadata ASYNC END TRIGGER');
+            });
+        }
+
+        return this.getPassageMetadata_inner();
+    }
 
     private getPassageMetadata_async = async () => {
         if (!this._bibleMetadata) {
@@ -84,24 +102,23 @@ export class BibleStoreClass extends StoreBase {
         };
     }
 
-    // selectBook = (bookKey: string) => {
-    //     this._selectedBookKey = bookKey;
-    //     this._selectedChapterNumber = null;
-    //     this._selectedVerseNumber = null;
-    //     this.trigger();
-    // };
+    selectBook = (bookKey: string) => {
+        this._selectedBookKey = bookKey;
+        this._selectedChapterNumber = null;
+        this._selectedVerseNumber = null;
+        this.reloadPassage();
+    };
 
-    // selectChapter = (chapterNumber: number) => {
-    //     this._selectedChapterNumber = chapterNumber;
-    //     this._selectedVerseNumber = null;
-    //     this.trigger();
-    // };
+    selectChapter = (chapterNumber: number | string) => {
+        this._selectedChapterNumber = 1 * (chapterNumber as number);
+        this._selectedVerseNumber = null;
+        this.reloadPassage();
+    };
 
-    // selectVerse = (verseNumber: number) => {
-    //     this._selectedVerseNumber = verseNumber;
-    //     this._passage = null;
-    //     this.trigger();
-    // };
+    selectVerse = (verseNumber: number | string) => {
+        this._selectedVerseNumber = 1 * (verseNumber as number);
+        this.reloadPassage();
+    };
 
     @autoSubscribe
     getPassage() {
@@ -114,18 +131,23 @@ export class BibleStoreClass extends StoreBase {
                 nextParts: [],
             };
 
-            setTimeout(async () => {
-                await this.generatePassage();
-                console.log('getPassage ASYNC TRIGGERING', { _passage: this._passage });
-                this.trigger();
-                console.log('getPassage ASYNC END', { _passage: this._passage });
-            });
+            this.reloadPassage();
         }
 
         console.log('getPassage END', { _passage: this._passage });
 
         return this._passage;
     }
+
+    reloadPassage = () => {
+        setTimeout(async () => {
+            this.startLoading();
+            await this.generatePassage();
+            console.log('getPassage ASYNC TRIGGERING', { _passage: this._passage });
+            this.endLoading();
+            console.log('getPassage ASYNC END', { _passage: this._passage });
+        });
+    };
 
     completePart = async (part: PassagePart) => {
         console.log('completePart', { part, _passage: this._passage });
@@ -134,8 +156,9 @@ export class BibleStoreClass extends StoreBase {
         if (this._passage.activeParts.every(x => x._isDone || x.kind !== 'choice')) {
             console.log('completePart ActiveParts DONE', { part, _passage: this._passage });
 
+            this.startLoading();
             await this.gotoAndGenerateNextPassage();
-            this.trigger();
+            this.endLoading();
 
             console.log('completePart TRIGGER', { part, _passage: this._passage });
         }

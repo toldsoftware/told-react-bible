@@ -5,9 +5,10 @@ import { PageLayout } from "../page/page-layout";
 import { styles } from "../../styles";
 import { PassageViewer } from "../bible/passage";
 import { BibleStore } from "../../store/bible-store";
+import { PassageChooser } from "../bible/passage-chooser";
 
 export const InteractPage = (props: { store: Store }) => (
-    <PageLayout store={props.store}>
+    <PageLayout store={props.store} postsStore={props.store.bibleStore}>
         <RX.View style={styles.page}>
             <InteractView store={props.store} />
         </RX.View>
@@ -20,6 +21,7 @@ export const InteractView = (props: { store: Store }) => storeComp(() => ({
     // console.log('InteractView  RENDER', { state, passage: state.passage, active: state.passage.activeParts });
     return (
         <RX.View>
+            <PassageChooser bibleStore={props.store.bibleStore} />
             <PassageViewer passage={state.passage} onPartDone={props.store.bibleStore.completePart} />
         </RX.View>
     );
