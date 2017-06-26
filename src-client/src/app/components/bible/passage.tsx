@@ -50,18 +50,21 @@ const styles = {
         fontSize: 16,
     }),
     choicesPart: RX.Styles.createViewStyle({
-        alignItems: 'center',
+        alignItems: 'stretch',
         justifyContent: 'center',
         height: sizes.lineHeight,
     }),
     choice: RX.Styles.createViewStyle({
-        height: sizes.choiceHeight,
+        height: sizes.choiceHeight - 2,
         marginRight: 4,
+        marginTop: 1,
+        marginBottom: 1,
     }),
     choice_default: RX.Styles.createTextStyle({
         margin: 0,
         padding: sizes.choice_padding,
         fontSize: 16,
+        textAlign: 'center',
         color: colors.text_choice,
         backgroundColor: colors.back_choice,
     }),
@@ -69,6 +72,7 @@ const styles = {
         margin: 0,
         padding: sizes.choice_padding,
         fontSize: 16,
+        textAlign: 'center',
         color: colors.text_correct,
         backgroundColor: colors.back_correct,
     }),
@@ -76,6 +80,7 @@ const styles = {
         margin: 0,
         padding: sizes.choice_padding,
         fontSize: 16,
+        textAlign: 'center',
         color: colors.text_wrong,
         backgroundColor: colors.back_wrong,
 
@@ -87,6 +92,7 @@ const styles = {
         margin: 0,
         padding: sizes.choice_padding,
         fontSize: 16,
+        textAlign: 'center',
 
         opacity: 0.1,
     }),
