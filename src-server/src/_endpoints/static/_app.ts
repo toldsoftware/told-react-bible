@@ -31,33 +31,43 @@ app.use((req, res, next) => {
 
   logger.log('graphiql file handler', 'path', req.path, 'query', req.query, 'filename', filename, 'path', p);
 
-  fs.readFile(p, (err, data) => {
-    logger.log('readFile path=', p);
+  let type = 'text/plain';
+  let encoding = 'utf8';
 
-    if (err != null) {
-      logger.log('ERROR: ', err, p);
-      res.statusCode = 404;
-      res.end('File Not Found: ' + p);
-      return;
-    }
+  if (p.match('\.html$')) { type = 'text/html'; }
+  if (p.match('\.css$')) { type = 'text/css'; }
+  if (p.match('\.js$')) { type = 'application/x-javascript'; }
+  if (p.match('\.json$')) { type = 'application/json'; }
+  if (p.match('\.jpg$')) { type = 'image/jpeg'; encoding = 'binary'; }
+  if (p.match('\.png$')) { type = 'image/png'; encoding = 'binary'; }
+  if (p.match('\.gif$')) { type = 'image/gif'; encoding = 'binary'; }
+  if (p.match('\.ico$')) { type = 'image/x-icon'; encoding = 'binary'; }
 
-    let body = data;
-
-    let type = 'text/plain';
-    let encoding = 'utf8';
-
-    if (p.match('\.html$')) { type = 'text/html'; }
-    if (p.match('\.css$')) { type = 'text/css'; }
-    if (p.match('\.js$')) { type = 'application/x-javascript'; }
-    if (p.match('\.json$')) { type = 'application/json'; }
-    if (p.match('\.jpg$')) { type = 'image/jpeg'; encoding = 'binary'; }
-    if (p.match('\.png$')) { type = 'image/png'; encoding = 'binary'; }
-    if (p.match('\.gif$')) { type = 'image/gif'; encoding = 'binary'; }
-    if (p.match('\.ico$')) { type = 'image/x-icon'; encoding = 'binary'; }
-
+  var s = fs.createReadStream(p);
+  s.on('open', () => {
     res.setHeader('Cache-Control', 'max-age=300000, public');
     res.setHeader('Content-Type', type);
-    res.end(body, encoding);
-
+    s.pipe(res);
   });
+  s.on('error', () => {
+    logger.log('ERROR: ', p);
+    res.setHeader('Content-Type', 'text/plain');
+    res.statusCode = 404;
+    res.end('File Not Found: ' + p);
+  });
+
+  // fs.readFile(p, (err, data) => {
+  //   logger.log('readFile path=', p);
+
+  //   if (err != null) {
+  //     logger.log('ERROR: ', err, p);
+  //     res.statusCode = 404;
+  //     res.end('File Not Found: ' + p);
+  //     return;
+  //   }
+
+  //   let body = data;
+  //   res.setHeader('Content-Type', type);
+  //   res.end(body, encoding);
+  // });
 });
