@@ -43,31 +43,18 @@ app.use((req, res, next) => {
   if (p.match('\.gif$')) { type = 'image/gif'; encoding = 'binary'; }
   if (p.match('\.ico$')) { type = 'image/x-icon'; encoding = 'binary'; }
 
-  var s = fs.createReadStream(p);
-  s.on('open', () => {
-    res.setHeader('Cache-Control', 'max-age=300000, public');
+  fs.readFile(p, (err, data) => {
+    logger.log('readFile path=', p);
+
+    if (err != null) {
+      logger.log('ERROR: ', err, p);
+      res.statusCode = 404;
+      res.end('File Not Found: ' + p);
+      return;
+    }
+
+    let body = data; res.setHeader('Cache-Control', 'max-age=300000, public');
     res.setHeader('Content-Type', type);
-    s.pipe(res);
+    res.end(body, encoding);
   });
-  s.on('error', () => {
-    logger.log('ERROR: ', p);
-    res.setHeader('Content-Type', 'text/plain');
-    res.statusCode = 404;
-    res.end('File Not Found: ' + p);
-  });
-
-  // fs.readFile(p, (err, data) => {
-  //   logger.log('readFile path=', p);
-
-  //   if (err != null) {
-  //     logger.log('ERROR: ', err, p);
-  //     res.statusCode = 404;
-  //     res.end('File Not Found: ' + p);
-  //     return;
-  //   }
-
-  //   let body = data;
-  //   res.setHeader('Content-Type', type);
-  //   res.end(body, encoding);
-  // });
 });
