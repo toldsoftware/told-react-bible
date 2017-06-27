@@ -15,10 +15,11 @@ import { ReadPage } from "./read-page";
 export const PageSelector = (props: { store: Store, pageName: string }) => {
     switch (props.pageName) {
         case 'Empty': return <EmptyPage store={props.store} />
+        case 'Settings': return <SettingsPage store={props.store} />
         // case 'Newsfeed': return <NewsPage store={props.store} />
         case 'Read': return <ReadPage store={props.store} />
-        case 'Interact': return <InteractPage store={props.store} />
-        default: return <SettingsPage store={props.store} />
+        case 'Interact': // return <InteractPage store={props.store} />
+        default: return <InteractPage store={props.store} />
     }
 };
 
