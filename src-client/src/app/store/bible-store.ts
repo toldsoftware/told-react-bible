@@ -224,11 +224,11 @@ export class BibleStoreClass extends StoreBase {
 
 
         if (verseOffset >= 0) {
-            if (m.verseIndex + verseOffset <= m.verseCount) {
+            if (m.verseIndex + verseOffset < m.verseCount) {
                 return await this.getVerseData(m.bookIndex, m.chapterIndex, m.verseIndex + verseOffset);
             }
 
-            if (m.chapterIndex < m.chapterCount) {
+            if (m.chapterIndex < m.chapterCount - 1) {
                 return await this.getVerseData(m.bookIndex, m.chapterIndex + 1, 0);
             }
 
