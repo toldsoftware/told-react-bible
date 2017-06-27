@@ -36,6 +36,9 @@ const styles = {
     }),
 
     viewer: RX.Styles.createViewStyle({
+
+    }),
+    chapter: RX.Styles.createTextStyle({
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'center',
@@ -138,11 +141,26 @@ export const PassageViewer = (props: { passage: Passage, onPartDone: (part: Pass
         ...props.passage.nextParts.map(x => ({ isActive: false, part: x, onPartDone: null })),
     ];
 
+    const chapters = allParts.reduce((out, x) => {
+        if (x.part.kind === 'chapterMarker' || !out.length) {
+            out.push([]);
+        }
+        const o = out[out.length - 1];
+        o.push(x);
+        return out;
+    }, [] as (typeof allParts)[]);
+
     return (
         <RX.View style={styles.viewer}>
-            {allParts.map(x => (
-                <RX.View key={x.part._key} style={x.isActive ? styles.active : styles.inactive}>
-                    <PassagePartViewer part={x.part} onPartDone={x.onPartDone} />
+            {chapters.map(c => (
+                <RX.View style={styles.chapter}>
+                    {
+                        c.map(x => (
+                            <RX.View key={x.part._key} style={x.isActive ? styles.active : styles.inactive}>
+                                <PassagePartViewer part={x.part} onPartDone={x.onPartDone} />
+                            </RX.View>
+                        ))
+                    }
                 </RX.View>
             ))}
         </RX.View>
@@ -158,7 +176,7 @@ export const PassageViewer = (props: { passage: Passage, onPartDone: (part: Pass
 };
 
 export const PassagePartViewer = (props: { key?: string, part: PassagePart, onPartDone?: () => void }) => {
-
+    // return (<RX.Text style={styles.textPart}>{props.part.kind} {props.part.text}</RX.Text>);
     switch (props.part.kind) {
         case 'chapterMarker': return (<RX.Text style={styles.chapterMarker}>{props.part.text}</RX.Text>);
         case 'verseMarker': return (<RX.Text style={styles.verseMarker}>{props.part.text}</RX.Text>);

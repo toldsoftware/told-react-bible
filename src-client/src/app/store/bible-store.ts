@@ -191,31 +191,43 @@ export class BibleStoreClass extends StoreBase {
     private gotoAndGenerateNextPassage = async () => {
         console.log('gotoAndGenerateNextPassage START', { _passage: this._passage });
 
-        await this.gotoNextVerseReference();
+        // await this.gotoNextVerseReference();
+        const nextActiveVerseData = await this.getVerseDataAtOffset(1);
+        const selectedVerseNumber = 1 * (nextActiveVerseData.verseID as any);
+        const selectedChapterNumber = 1 * (nextActiveVerseData.chapterID as any);
+
+        // Avoid Double Call
+        if (selectedVerseNumber === this._selectedVerseNumber
+            && selectedChapterNumber === this._selectedChapterNumber) {
+            return;
+        }
+
+        this._selectedVerseNumber = selectedVerseNumber;
+        this._selectedChapterNumber = selectedChapterNumber;
+        const nextVerseData = await this.getVerseDataAtOffset(1);
         this._passage = {
-            //previousParts: [...this._passage.previousParts, ...this._passage.activeParts.map(x => { x._key += 'done'; return x; })],
             previousParts: [...this._passage.previousParts, ...this._passage.activeParts],
             activeParts: [...this._passage.nextParts],
-            nextParts: this._passageGenerator.createParts(await this.getVerseDataAtOffset(1), true)
+            nextParts: this._passageGenerator.createParts(nextVerseData, true)
         };
 
         console.log('gotoAndGenerateNextPassage END', { _passage: this._passage });
     };
 
-    private gotoNextVerseReference = async () => {
-        const m = await this.getPassageMetadata_async();
+    // private gotoNextVerseReference = async () => {
+    //     const m = await this.getPassageMetadata_async();
 
-        if (m.verseIndex + 1 <= m.verseCount) {
-            this._selectedVerseNumber++;
-            return;
-        }
+    //     if (m.verseIndex + 1 <= m.verseCount) {
+    //         this._selectedVerseNumber++;
+    //         return;
+    //     }
 
-        if (m.chapterIndex < m.chapterCount) {
-            this._selectedVerseNumber = 1;
-            this._selectedChapterNumber++;
-            return;
-        }
-    };
+    //     if (m.chapterIndex < m.chapterCount) {
+    //         this._selectedVerseNumber = 1;
+    //         this._selectedChapterNumber++;
+    //         return;
+    //     }
+    // };
 
     private getVerseDataAtOffset = async (verseOffset: number) => {
         const m = await this.getPassageMetadata_async();
@@ -277,7 +289,11 @@ export class BibleStoreClass extends StoreBase {
 
         console.log('getVerseData END', { _bibleData: this._bibleData, _bibleMetadata: this._bibleMetadata });
 
-        return this._bibleData.books[bookIndex].chapters[chapterIndex].verses[verseIndex];
+        const vData = this._bibleData.books[bookIndex].chapters[chapterIndex].verses[verseIndex];
+
+        // Add Chapter ID
+        vData.chapterID = '' + (chapterIndex + 1);
+        return vData;
     }
 
     private _downloadMetadata_busy = false;

@@ -1,4 +1,4 @@
-import { PassagePartChoice, PassagePart, VerseData, WordStats } from "./types";
+import { PassagePartChoice, PassagePart, VerseData} from "./types";
 
 const MIN_CHOICE_SPACING = 2;
 const MAX_CHOICE_SPACING = 5;
@@ -12,6 +12,7 @@ export class PassagePartsGenerator {
 
     private _iToChoice = MIN_CHOICE_SPACING + Math.ceil((MAX_CHOICE_SPACING - MIN_CHOICE_SPACING) * Math.random());
     private _nextKey = 0;
+
     createParts(verseData: VerseData, shouldMakeChoices = true): PassagePart[] {
         if (!verseData || !verseData.text.length) { return []; }
 
