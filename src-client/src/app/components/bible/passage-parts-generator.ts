@@ -33,7 +33,15 @@ export class PassagePartsGenerator {
             text: verseData.verseID
         });
 
-        const words = verseData.text.replace(/\n/g, ' \n ').replace(/ +/g, ' ').split(' ');
+        const words = verseData.text
+            .replace(/\n/g, ' \n ')
+            .replace(/ +/g, ' ')
+
+            // Split on em dash
+            .replace(/—/g, ' — ')
+
+            .split(' ');
+
 
         let wordParts: PassagePart[] = words.map(w => ({
             _key: '' + this._nextKey++,
@@ -48,6 +56,7 @@ export class PassagePartsGenerator {
 
             wordParts = wordParts.map(p => {
                 if (p.text.trim().length <= 0) { return p; }
+                if (!p.text.match(/\w/)) { return p; }
 
                 this._iToChoice--;
                 if (this._iToChoice > 0) { return p; }
