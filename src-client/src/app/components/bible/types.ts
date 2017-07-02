@@ -76,13 +76,14 @@ export interface BookData {
 }
 
 export interface ChapterData {
-    chapterID: string;
+    c: string;
     verses: VerseData[];
 }
 
 export interface VerseData {
-    chapterID: string;
-    verseID: string;
+    c: string;
+    v: string;
+    vEnd?: string;
     text: string;
 }
 

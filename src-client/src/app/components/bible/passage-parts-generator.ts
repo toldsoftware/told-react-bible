@@ -18,12 +18,12 @@ export class PassagePartsGenerator {
 
         let parts: PassagePart[] = [];
 
-        if (verseData.verseID === "1") {
+        if (verseData.v === "1") {
             parts.push({
                 _key: '' + this._nextKey++,
                 kind: 'chapterMarker',
                 isActive: false,
-                text: verseData.chapterID
+                text: verseData.c
             });
         }
 
@@ -31,7 +31,7 @@ export class PassagePartsGenerator {
             _key: '' + this._nextKey++,
             kind: 'verseMarker',
             isActive: false,
-            text: verseData.verseID
+            text: verseData.v
         });
 
         const words = verseData.text

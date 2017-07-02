@@ -193,8 +193,8 @@ export class BibleStoreClass extends StoreBase {
 
         // await this.gotoNextVerseReference();
         const nextActiveVerseData = await this.getVerseDataAtOffset(1);
-        const selectedVerseNumber = 1 * (nextActiveVerseData.verseID as any);
-        const selectedChapterNumber = 1 * (nextActiveVerseData.chapterID as any);
+        const selectedVerseNumber = 1 * (nextActiveVerseData.v as any);
+        const selectedChapterNumber = 1 * (nextActiveVerseData.c as any);
 
         // Avoid Double Call
         if (selectedVerseNumber === this._selectedVerseNumber
@@ -292,7 +292,7 @@ export class BibleStoreClass extends StoreBase {
         const vData = this._bibleData.books[bookIndex].chapters[chapterIndex].verses[verseIndex];
 
         // Add Chapter ID
-        vData.chapterID = '' + (chapterIndex + 1);
+        vData.c = '' + (chapterIndex + 1);
         return vData;
     }
 
