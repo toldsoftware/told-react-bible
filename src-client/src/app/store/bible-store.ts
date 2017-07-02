@@ -73,6 +73,14 @@ export class BibleStoreClass extends StoreBase {
         return this.getPassageMetadata_inner();
     }
 
+    @autoSubscribe
+    getVerseCount() {
+        const m = this.getPassageMetadata_inner();
+        const b = m && this._bibleData && this._bibleData.books[m.bookIndex];
+        const ch = b && b.chapters[m.chapterIndex];
+        return ch && ch.verseCount;
+    }
+
     private getPassageMetadata_async = async () => {
         if (!this._bibleMetadata) {
             await this.downloadMetadata();
@@ -98,7 +106,7 @@ export class BibleStoreClass extends StoreBase {
             books: this._bibleMetadata && this._bibleMetadata.books,
             bookName: bookMetadata && bookMetadata.bookName,
             chapterCount: bookMetadata && bookMetadata.chapterCount,
-            verseCount: chapterMetadata && chapterMetadata.verseCount,
+            // verseCount: chapterMetadata && chapterMetadata.verseCount,
         };
     }
 
@@ -236,7 +244,10 @@ export class BibleStoreClass extends StoreBase {
 
 
         if (verseOffset >= 0) {
-            if (m.verseIndex + verseOffset < m.verseCount) {
+            const ch = await this.getChapterData(m.bookIndex, m.chapterIndex);
+            const vCount = ch.verseCount;
+
+            if (m.verseIndex + verseOffset < vCount) {
                 return await this.getVerseData(m.bookIndex, m.chapterIndex, m.verseIndex + verseOffset);
             }
 
@@ -253,7 +264,8 @@ export class BibleStoreClass extends StoreBase {
             }
 
             if (m.chapterIndex > 0) {
-                const vCount = this._bibleMetadata.books[m.bookIndex].chapters[m.chapterIndex - 1].verseCount;
+                const ch = await this.getChapterData(m.bookIndex, m.chapterIndex - 1);
+                const vCount = ch.verseCount;
                 return await this.getVerseData(m.bookIndex, m.chapterIndex - 1, vCount - 1);
             }
 
@@ -262,8 +274,7 @@ export class BibleStoreClass extends StoreBase {
         }
     };
 
-    private getVerseData = async (bookIndex: number, chapterIndex: number, verseIndex: number) => {
-
+    private getChapterData = async (bookIndex: number, chapterIndex: number) => {
         if (!this._bibleMetadata) {
             await this.downloadMetadata();
         }
@@ -289,7 +300,20 @@ export class BibleStoreClass extends StoreBase {
 
         console.log('getVerseData END', { _bibleData: this._bibleData, _bibleMetadata: this._bibleMetadata });
 
-        const vData = this._bibleData.books[bookIndex].chapters[chapterIndex].verses[verseIndex];
+        const ch = this._bibleData.books[bookIndex].chapters[chapterIndex];
+
+        // Add Chapter ID
+        ch.c = '' + (chapterIndex + 1);
+
+        const vLast = ch && ch.verses[ch.verses.length - 1];
+        ch.verseCount = vLast && 1 * ((vLast.vEnd || vLast.v) as any);
+        return ch;
+    }
+
+    private getVerseData = async (bookIndex: number, chapterIndex: number, verseIndex: number) => {
+
+        const chData = await this.getChapterData(bookIndex, chapterIndex);
+        const vData = chData.verses[verseIndex];
 
         // Add Chapter ID
         vData.c = '' + (chapterIndex + 1);

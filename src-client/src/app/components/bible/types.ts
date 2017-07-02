@@ -42,7 +42,7 @@ export interface BookMetadata {
 
 export interface ChapterMetadata {
     chapterID: string;
-    verseCount: number;
+    // verseCount: number;
 }
 
 // User Progress
@@ -78,6 +78,7 @@ export interface BookData {
 export interface ChapterData {
     c: string;
     verses: VerseData[];
+    verseCount?: number;
 }
 
 export interface VerseData {
