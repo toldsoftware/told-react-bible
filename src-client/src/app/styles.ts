@@ -2,28 +2,31 @@ import * as RX from 'reactxp';
 
 import { createIconStyle } from './components/common/icons/icon-base';
 
+// http://paletton.com/palette.php?uid=73H0w0krgXhf-YmlJXR-0VBRLKY
 const pallette = {
-    primary_0: '#3D3783',
-    primary_1: '#7B76B6',
-    primary_2: '#57529B',
-    primary_3: '#29246E',
-    primary_4: '#141050',
-    secondary_1_0: '#993369',
-    secondary_1_1: '#D37DAA',
-    secondary_1_2: '#B65286',
-    secondary_1_3: '#801C51',
-    secondary_1_4: '#5E0634',
-    secondary_2_0: '#85AE3A',
-    secondary_2_1: '#CBEE8D',
-    secondary_2_2: '#A6CF5D',
-    secondary_2_3: '#699220',
-    secondary_2_4: '#476B07',
-    complement_0: '#BC9F3E',
-    complement_1: '#FFE797',
-    complement_2: '#DFC364',
-    complement_3: '#9D8122',
-    complement_4: '#735A08',
+    primary_0: '#387EF5',
+    primary_1: '#8BB3F8',
+    primary_2: '#5F97F7',
+    primary_3: '#1466F1',
+    primary_4: '#0652D4',
+    secondary_1_0: '#643DF6',
+    secondary_1_1: '#A48EF8',
+    secondary_1_2: '#8263F7',
+    secondary_1_3: '#4719F2',
+    secondary_1_4: '#3307D7',
+    secondary_2_0: '#FFD726',
+    secondary_2_1: '#FFE883',
+    secondary_2_2: '#FFDF52',
+    secondary_2_3: '#FFD100',
+    secondary_2_4: '#FFD100',
+    complement_0: '#FFB126',
+    complement_1: '#FFD383',
+    complement_2: '#FFC152',
+    complement_3: '#FFA400',
+    complement_4: '#FFA400',
 };
+
+
 
 // const iconColors_sections = {
 //     a_purple: '#BC403D',
