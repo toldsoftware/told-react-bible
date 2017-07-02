@@ -33,6 +33,6 @@ app.get('/api/bible/:version/:book/:chapter', async (req, res) => {
   const chapter = req.params.chapter;
 
   res.json({
-    result: await fetchChapterData(version, book, chapter),
+    data: await fetchChapterData(version, book, chapter),
   });
 });
