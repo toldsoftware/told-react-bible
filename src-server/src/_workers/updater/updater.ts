@@ -63,7 +63,8 @@ export async function processUpdates() {
     const groups = group(messages, m => getId_UpdateQueueMessage(m.data));
 
     // logger.log('processUpdates', { groups });
-    for (let g of groups) {
+    for (let k in groups) {
+        const g = groups[k];
         const messages = g.items;
         const r = await processUpdate(messages[0].data);
         updateCount += r.updateCount;
