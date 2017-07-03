@@ -19,20 +19,28 @@ export class PassagePartsGenerator {
         const parts: PassagePart[] = [];
 
         verseData.p.forEach(x => {
-            parts.push(...this.createParts_paragraph(x));
+            parts.push(...this.createParts_paragraph(verseData.c, x, shouldMakeChoices));
         });
 
         return parts;
     }
 
-    createParts_paragraph(verseParagraph: VerseParagraph, shouldMakeChoices = true): PassagePart[] {
+    createParts_paragraph(chapterNumber: number, verseParagraph: VerseParagraph, shouldMakeChoices = true): PassagePart[] {
         if (!verseParagraph || !verseParagraph.x) { return []; }
 
-        if (verseParagraph.k === 'header') {
+        if (verseParagraph.k === 'heading') {
             return [{
                 _key: '' + this._nextKey++,
-                kind: 'header',
+                kind: 'lineBreak',
+                text: '\n'
+            }, {
+                _key: '' + this._nextKey++,
+                kind: 'heading',
                 text: verseParagraph.x.map(x => x.t).join(' '),
+            }, {
+                _key: '' + this._nextKey++,
+                kind: 'lineBreak',
+                text: '\n'
             }];
         }
 
@@ -45,7 +53,7 @@ export class PassagePartsGenerator {
                     parts.push({
                         _key: '' + this._nextKey++,
                         kind: 'chapterMarker',
-                        text: '' + verseParagraph.x,
+                        text: '' + chapterNumber,
                     });
                 }
                 parts.push({
@@ -54,7 +62,7 @@ export class PassagePartsGenerator {
                     text: c.t,
                 });
             } else {
-                parts.push(...this.createParts_text(c.t));
+                parts.push(...this.createParts_text(c.t, shouldMakeChoices));
             }
         }
 

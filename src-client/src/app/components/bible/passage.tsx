@@ -38,12 +38,18 @@ const styles = {
     viewer: RX.Styles.createViewStyle({
 
     }),
-    chapter: RX.Styles.createTextStyle({
+    paragraph: RX.Styles.createTextStyle({
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'center',
         backgroundColor: colors.back_viewer,
         padding: 8,
+    }),
+    heading: RX.Styles.createTextStyle({
+        marginRight: 2,
+        marginLeft: 2,
+        fontSize: 48,
+        color: colors.text_marker,
     }),
     chapterMarker: RX.Styles.createTextStyle({
         marginRight: 2,
@@ -141,8 +147,8 @@ export const PassageViewer = (props: { passage: Passage, onPartDone: (part: Pass
         ...props.passage.nextParts.map(x => ({ isActive: false, part: x, onPartDone: null })),
     ];
 
-    const chapters = allParts.reduce((out, x) => {
-        if (x.part.kind === 'chapterMarker' || !out.length) {
+    const paragraphs = allParts.reduce((out, x) => {
+        if (x.part.kind === 'lineBreak' || !out.length) {
             out.push([]);
         }
         const o = out[out.length - 1];
@@ -152,8 +158,8 @@ export const PassageViewer = (props: { passage: Passage, onPartDone: (part: Pass
 
     return (
         <RX.View style={styles.viewer}>
-            {chapters.map(c => (
-                <RX.View style={styles.chapter}>
+            {paragraphs.map(c => (
+                <RX.View style={styles.paragraph}>
                     {
                         c.map(x => (
                             <RX.View key={x.part._key} style={x.isActive ? styles.active : styles.inactive}>
@@ -180,6 +186,7 @@ export const PassagePartViewer = (props: { key?: string, part: PassagePart, onPa
     switch (props.part.kind) {
         case 'chapterMarker': return (<RX.Text style={styles.chapterMarker}>{props.part.text}</RX.Text>);
         case 'verseMarker': return (<RX.Text style={styles.verseMarker}>{props.part.text}</RX.Text>);
+        case 'heading': return (<RX.Text style={styles.heading}>{props.part.text}</RX.Text>);
         case 'choice': return (<PassageChoicesViewer part={props.part} onPartDone={props.onPartDone} />);
         case 'text': default: return (<RX.View style={styles.textPart_view}><RX.Text style={styles.textPart}>{props.part.text}</RX.Text></RX.View>);
     }

@@ -6,7 +6,7 @@ export interface Passage {
 }
 
 export interface PassagePart {
-    kind: 'lineBreak' | 'chapterMarker' | 'verseMarker' | 'text' | 'choice' | 'header';
+    kind: 'lineBreak' | 'chapterMarker' | 'verseMarker' | 'text' | 'choice' | 'heading';
     isActive?: boolean;
 
     text: string;
@@ -98,7 +98,7 @@ export interface VerseParagraph {
     // q1 = Poetry Indent 1
     // q2 = Poetry Indent 2
     // br = Blank Line
-    k?: '' | 'header' | 'q1' | 'q2' | 'b';
+    k?: '' | 'heading' | 'q1' | 'q2' | 'b';
     x: VerseContent[];
 }
 
