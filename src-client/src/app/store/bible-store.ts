@@ -18,10 +18,14 @@ export class BibleStoreClass extends StoreBase {
 
     _bibleMetadata: BibleMetadata;
 
-    versions = bibleVersions.map(x => ({
-        value: x.value,
-        label: `${x.lang_name.match(/English/) ? '' : '(' + x.lang_name + ')'} ${x.name}`.trim()
-    }));
+    versions = bibleVersions.map(x => {
+        let label = `${x.lang_name.match(/^English/) ? '' : '(' + x.lang_name + ')'} ${x.name}`.trim();
+        label = label.length > 50 ? label.substr(0, 50) + '...' : label;
+        return {
+            value: x.value,
+            label
+        };
+    });
     // versions = [
     //     { value: 'eng-ESV', label: 'ESV (English Standard Version)' },
     //     { value: 'eng-ESV', label: 'ESV (English Standard Version)' },
