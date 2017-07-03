@@ -30,8 +30,10 @@ const sizes = {
 
 const styles = {
     active: RX.Styles.createViewStyle({
+        flex: 1,
     }),
     inactive: RX.Styles.createViewStyle({
+        flex: 1,
         opacity: 0.75,
     }),
 
@@ -45,7 +47,11 @@ const styles = {
         backgroundColor: colors.back_viewer,
         padding: 8,
     }),
+    paragraph_end: RX.Styles.createTextStyle({
+        flex: 1000,
+    }),
     heading: RX.Styles.createTextStyle({
+        flex: 1,
         marginRight: 2,
         marginLeft: 2,
         fontSize: 48,
@@ -66,8 +72,8 @@ const styles = {
     }),
     textPart_view: RX.Styles.createViewStyle({
         // height: sizes.lineHeight,
-        alignItems: 'center',
-        justifyContent: 'center',
+        // alignItems: 'center',
+        // justifyContent: 'center',
     }),
     textPart: RX.Styles.createTextStyle({
         marginRight: 2,
@@ -150,6 +156,7 @@ export const PassageViewer = (props: { passage: Passage, onPartDone: (part: Pass
     const paragraphs = allParts.reduce((out, x) => {
         if (x.part.kind === 'lineBreak' || !out.length) {
             out.push([]);
+            return out;
         }
         const o = out[out.length - 1];
         o.push(x);
@@ -167,6 +174,8 @@ export const PassageViewer = (props: { passage: Passage, onPartDone: (part: Pass
                             </RX.View>
                         ))
                     }
+                    <RX.View style={styles.paragraph_end}>
+                    </RX.View>
                 </RX.View>
             ))}
         </RX.View>

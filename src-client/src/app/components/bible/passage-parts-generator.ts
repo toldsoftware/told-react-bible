@@ -48,7 +48,7 @@ export class PassagePartsGenerator {
 
         for (let c of verseParagraph.x) {
             if (c.k === 'verse') {
-                if (c.t.match(/(1|1-)/)) {
+                if (c.t.match(/^(1$|1-)/)) {
                     // Add Chapter Marker Also
                     parts.push({
                         _key: '' + this._nextKey++,
