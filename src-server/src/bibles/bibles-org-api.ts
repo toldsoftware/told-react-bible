@@ -144,7 +144,7 @@ function parsePassageText(chapter: number, passageText: string): ChapterData {
     const paragraphs: VerseParagraph[] = o.childNodes.map(p => {
         if (p.nodeName === 'h3') {
             return {
-                k: 'h',
+                k: 'header',
                 x: [{ t: p.childNodes[0].value }],
             } as VerseParagraph;
         } else if (p.nodeName === 'p') {
@@ -153,7 +153,7 @@ function parsePassageText(chapter: number, passageText: string): ChapterData {
                 x: p.childNodes.map(c => {
                     if (c.nodeName === 'sup') {
                         return {
-                            k: 'v',
+                            k: 'verse',
                             t: c.childNodes[0].value
                         } as VerseContent;
                     } else if (c.nodeName === 'span') {
@@ -176,7 +176,7 @@ function parsePassageText(chapter: number, passageText: string): ChapterData {
     });
 
     const numbered = paragraphs.filter(p => p).map((p, i) => {
-        let vNumbers = p.x.filter(x => x.k === 'v');
+        let vNumbers = p.x.filter(x => x.k === 'verse');
 
         if (!vNumbers.length) {
             return {
@@ -198,7 +198,7 @@ function parsePassageText(chapter: number, passageText: string): ChapterData {
     numbered.forEach((p, i) => {
         if (p.vStart) { return; }
 
-        if (p.k === 'h') {
+        if (p.k === 'header') {
             p.vStart = numbered[i + 1].vStart;
             p.vEnd = numbered[i + 1].vEnd;
         } else {

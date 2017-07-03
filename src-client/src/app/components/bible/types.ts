@@ -98,7 +98,7 @@ export interface VerseParagraph {
     // q1 = Poetry Indent 1
     // q2 = Poetry Indent 2
     // br = Blank Line
-    k?: '' | 'h' | 'q1' | 'q2' | 'b';
+    k?: '' | 'header' | 'q1' | 'q2' | 'b';
     x: VerseContent[];
 }
 
@@ -107,7 +107,7 @@ export interface VerseContent {
     t: string;
     // Kind: null == default
     // v = Verse Number
-    k?: '' | 'v';
+    k?: '' | 'verse';
 }
 
 export interface WordStats {

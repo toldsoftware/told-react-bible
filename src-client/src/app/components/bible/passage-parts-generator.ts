@@ -28,7 +28,7 @@ export class PassagePartsGenerator {
     createParts_paragraph(verseParagraph: VerseParagraph, shouldMakeChoices = true): PassagePart[] {
         if (!verseParagraph || !verseParagraph.x) { return []; }
 
-        if (verseParagraph.k === 'h') {
+        if (verseParagraph.k === 'header') {
             return [{
                 _key: '' + this._nextKey++,
                 kind: 'header',
@@ -39,7 +39,7 @@ export class PassagePartsGenerator {
         const parts: PassagePart[] = [];
 
         for (let c of verseParagraph.x) {
-            if (c.k === 'v') {
+            if (c.k === 'verse') {
                 if (c.t.match(/(1|1-)/)) {
                     // Add Chapter Marker Also
                     parts.push({
