@@ -217,12 +217,18 @@ export class BibleStoreClass extends StoreBase {
 
         this._selectedBookKey = this._selectedBookKey || this._bibleMetadata.books[0].bookID;
         this._selectedChapterNumber = this._selectedChapterNumber || 1;
-        // this._selectedVerseLabel = this._selectedVerseLabel || 1;
+        this._selectedVersion = this._selectedVersion || this.versions[0].value;
+
+        const vPrev = await this.getVerseDataAtOffset(-1);
+        const vActive = await this.getVerseDataAtOffset(0);
+        const vNext = await this.getVerseDataAtOffset(1);
+
+        this._selectedVerseLabel = this._selectedVerseLabel || vActive.vLabel;
 
         this._passage = {
-            previousParts: this._passageGenerator.createParts(await this.getVerseDataAtOffset(-1), false),
-            activeParts: this._passageGenerator.createParts(await this.getVerseDataAtOffset(0), true),
-            nextParts: this._passageGenerator.createParts(await this.getVerseDataAtOffset(1), true)
+            previousParts: this._passageGenerator.createParts(vPrev, false),
+            activeParts: this._passageGenerator.createParts(vActive, true),
+            nextParts: this._passageGenerator.createParts(vNext, true)
         };
 
         console.log('generatePassage END', { _passage: this._passage });
