@@ -5,6 +5,7 @@ import { FacebookAccess } from "../components/common/account/facebook-login";
 import { Passage, BibleMetadata, BibleData, PassagePart } from "../components/bible/types";
 import { PassagePartsGenerator } from "../components/bible/passage-parts-generator";
 import { downloadBibleChapterData, downloadBibleMetadata } from "../server-access/bible-data";
+import { bibleVersions } from "../server-access/bible-data-versions";
 import { delay } from "./helpers";
 
 @AutoSubscribeStore
@@ -16,6 +17,18 @@ export class BibleStoreClass extends StoreBase {
     _bibleData: BibleData;
 
     _bibleMetadata: BibleMetadata;
+
+    versions = bibleVersions.map(x => ({
+        value: x.value,
+        label: `${x.lang_name.match(/English/) ? '' : '(' + x.lang_name + ')'} ${x.name}`.trim()
+    }));
+    // versions = [
+    //     { value: 'eng-ESV', label: 'ESV (English Standard Version)' },
+    //     { value: 'eng-ESV', label: 'ESV (English Standard Version)' },
+    // ];
+
+    @autoDeviceStorage(null, 'eng-ESV')
+    _selectedVersion: string;
 
     @autoDeviceStorage(null, 'Bible')
     _selectedBookKey: string;
@@ -37,6 +50,7 @@ export class BibleStoreClass extends StoreBase {
 
     private ensureLoad = async () => {
         let val = null as any;
+        val = this._selectedVersion;
         val = this._selectedBookKey;
         val = this._selectedChapterNumber;
         val = this._selectedVerseNumber;
@@ -55,6 +69,22 @@ export class BibleStoreClass extends StoreBase {
     endLoading = () => {
         this._isLoading = false;
         this.trigger();
+    };
+
+    @autoSubscribe
+    getVersions() {
+        return this.versions;
+    }
+
+    @autoSubscribe
+    getSelectedVersion() {
+        return this._selectedVersion;
+    }
+
+    selectVersion = (version: string) => {
+        this._selectedVersion = version;
+        this._bibleData = null;
+        this.reloadPassage();
     };
 
     @autoSubscribe
@@ -295,7 +325,7 @@ export class BibleStoreClass extends StoreBase {
         if (!this._bibleData.books[bookIndex].chapters[chapterIndex]) {
             this._bibleData.books[bookIndex].hasChapterDownloadStarted[chapterIndex] = true;
             this._bibleData.books[bookIndex].chapters[chapterIndex] =
-                await downloadBibleChapterData('WEB', bookIndex + 1, m.books[bookIndex].bookID, chapterIndex + 1);
+                await downloadBibleChapterData(this._selectedVersion || this.versions[0].value, bookIndex + 1, m.books[bookIndex].bookID, chapterIndex + 1);
         }
 
         console.log('getVerseData END', { _bibleData: this._bibleData, _bibleMetadata: this._bibleMetadata });

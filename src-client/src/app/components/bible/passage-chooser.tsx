@@ -22,18 +22,15 @@ const localStyles = {
 };
 
 export const PassageChooser = (props: { bibleStore: BibleStore }) => storeComp(() => ({
+    selectedVersion: props.bibleStore.getSelectedVersion(),
+    versions: props.bibleStore.getVersions(),
     m: props.bibleStore.getPassageMetadata(),
     verseCount: props.bibleStore.getVerseCount(),
 }), (state) => {
 
     return (
         <RX.View style={localStyles.chooser}>
-            <RX.View style={localStyles.selector}>
-                <RX.Text style={localStyles.label}>Version</RX.Text>
-                <RX.Text>ESV (English Standard Version)</RX.Text>
-            </RX.View>
-
-            {/*<Selector label='Version' value={state.m.bookKey} choices={state.m.books.map(x => ({ label: x.bookName, value: x.bookID }))} onChoice={props.bibleStore.selectBook} />*/}
+            <Selector label='Version' value={state.selectedVersion} choices={state.versions} onChoice={props.bibleStore.selectVersion} />
             <Selector label='Book' value={state.m.bookKey} choices={state.m.books.map(x => ({ label: x.bookName, value: x.bookID }))} onChoice={props.bibleStore.selectBook} />
             <Selector label='Chapter' value={state.m.chapterNumber + ''} choices={getNumbersList(state.m.chapterCount)} onChoice={props.bibleStore.selectChapter} />
             <Selector label='Verse' value={state.m.verseNumber + ''} choices={getNumbersList(state.verseCount)} onChoice={props.bibleStore.selectVerse} />

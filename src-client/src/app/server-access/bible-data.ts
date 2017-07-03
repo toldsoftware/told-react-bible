@@ -24,8 +24,6 @@ export async function downloadBibleMetadata(versionKey: string) {
 
 
 export async function downloadBibleChapterData(versionKey: string, bookNumber: number, bookKey: string, chapterNumber: number) {
-    // TODO: Support versions
-    versionKey = 'eng-ESV';
     const url = `http://www.reactbible.com/api/bible/${versionKey}/${bookKey}/${chapterNumber}`;
     const result = await fetch(url);
     const obj = await result.json();
