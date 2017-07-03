@@ -214,7 +214,10 @@ function parsePassageText(chapter: number, passageText: string): ChapterData {
             c: chapter,
             vStart: g[0].vStart,
             vEnd: g[g.length - 1].vEnd,
-            p: g
+            p: g.map(p => ({
+                k: p.k,
+                x: p.x
+            }))
         };
     });
 
