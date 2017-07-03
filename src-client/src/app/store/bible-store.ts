@@ -41,7 +41,7 @@ export class BibleStoreClass extends StoreBase {
     _selectedChapterNumber: number;
 
     @autoDeviceStorage(null, 'Bible')
-    _selectedVerseNumber: number;
+    _selectedVerseLabel: string;
 
     _passage: Passage;
 
@@ -57,7 +57,7 @@ export class BibleStoreClass extends StoreBase {
         val = this._selectedVersion;
         val = this._selectedBookKey;
         val = this._selectedChapterNumber;
-        val = this._selectedVerseNumber;
+        val = this._selectedVerseLabel;
     };
 
     @autoSubscribe
@@ -108,11 +108,11 @@ export class BibleStoreClass extends StoreBase {
     }
 
     @autoSubscribe
-    getVerseCount() {
+    getVerseLabels() {
         const m = this.getPassageMetadata_inner();
         const b = m && this._bibleData && this._bibleData.books[m.bookIndex];
         const ch = b && b.chapters[m.chapterIndex];
-        return ch && ch.verseCount;
+        return ch && ch.verseData.map(x => x.vLabel);
     }
 
     private getPassageMetadata_async = async () => {
@@ -131,34 +131,32 @@ export class BibleStoreClass extends StoreBase {
         return {
             bookKey: this._selectedBookKey,
             chapterNumber: this._selectedChapterNumber,
-            verseNumber: this._selectedVerseNumber,
+            verseLabel: this._selectedVerseLabel,
 
             bookIndex: bookMetadata && bookMetadata.bookIndex || 0,
             chapterIndex: (this._selectedChapterNumber || 1) - 1,
-            verseIndex: (this._selectedVerseNumber || 1) - 1,
 
             books: this._bibleMetadata && this._bibleMetadata.books,
             bookName: bookMetadata && bookMetadata.bookName,
             chapterCount: bookMetadata && bookMetadata.chapterCount,
-            // verseCount: chapterMetadata && chapterMetadata.verseCount,
         };
     }
 
     selectBook = (bookKey: string) => {
         this._selectedBookKey = bookKey;
         this._selectedChapterNumber = null;
-        this._selectedVerseNumber = null;
+        this._selectedVerseLabel = null;
         this.reloadPassage();
     };
 
     selectChapter = (chapterNumber: number | string) => {
         this._selectedChapterNumber = 1 * (chapterNumber as number);
-        this._selectedVerseNumber = null;
+        this._selectedVerseLabel = null;
         this.reloadPassage();
     };
 
-    selectVerse = (verseNumber: number | string) => {
-        this._selectedVerseNumber = 1 * (verseNumber as number);
+    selectVerse = (verseLabel: string) => {
+        this._selectedVerseLabel = verseLabel;
         this.reloadPassage();
     };
 
@@ -219,7 +217,7 @@ export class BibleStoreClass extends StoreBase {
 
         this._selectedBookKey = this._selectedBookKey || this._bibleMetadata.books[0].bookID;
         this._selectedChapterNumber = this._selectedChapterNumber || 1;
-        this._selectedVerseNumber = this._selectedVerseNumber || 1;
+        // this._selectedVerseLabel = this._selectedVerseLabel || 1;
 
         this._passage = {
             previousParts: this._passageGenerator.createParts(await this.getVerseDataAtOffset(-1), false),
@@ -235,16 +233,16 @@ export class BibleStoreClass extends StoreBase {
 
         // await this.gotoNextVerseReference();
         const nextActiveVerseData = await this.getVerseDataAtOffset(1);
-        const selectedVerseNumber = 1 * (nextActiveVerseData.v as any);
-        const selectedChapterNumber = 1 * (nextActiveVerseData.c as any);
+        const selectedVerseLabel = nextActiveVerseData.vLabel;
+        const selectedChapterNumber = nextActiveVerseData.c;
 
         // Avoid Double Call
-        if (selectedVerseNumber === this._selectedVerseNumber
+        if (selectedVerseLabel === this._selectedVerseLabel
             && selectedChapterNumber === this._selectedChapterNumber) {
             return;
         }
 
-        this._selectedVerseNumber = selectedVerseNumber;
+        this._selectedVerseLabel = selectedVerseLabel;
         this._selectedChapterNumber = selectedChapterNumber;
         const nextVerseData = await this.getVerseDataAtOffset(1);
         this._passage = {
@@ -271,18 +269,18 @@ export class BibleStoreClass extends StoreBase {
     //     }
     // };
 
-    private getVerseDataAtOffset = async (verseOffset: number) => {
+    private getVerseDataAtOffset = async (verseIndexOffset: number) => {
         const m = await this.getPassageMetadata_async();
+        const ch = await this.getChapterData(m.bookIndex, m.chapterIndex);
+        const vIndex = ch.verseData.map((x, i) => ({ x, i })).filter(x => x.x.vLabel === m.verseLabel)[0].i;
 
         console.log('getVerseDataAtOffset START', { getPassageMetadata: m });
 
+        if (verseIndexOffset >= 0) {
+            const vCount = ch.verseData.length;
 
-        if (verseOffset >= 0) {
-            const ch = await this.getChapterData(m.bookIndex, m.chapterIndex);
-            const vCount = ch.verseCount;
-
-            if (m.verseIndex + verseOffset < vCount) {
-                return await this.getVerseData(m.bookIndex, m.chapterIndex, m.verseIndex + verseOffset);
+            if (vIndex + verseIndexOffset < vCount) {
+                return await this.getVerseData(m.bookIndex, m.chapterIndex, vIndex + verseIndexOffset);
             }
 
             if (m.chapterIndex < m.chapterCount - 1) {
@@ -293,14 +291,14 @@ export class BibleStoreClass extends StoreBase {
             return null;
         }
         else {
-            if (m.verseIndex + verseOffset >= 0) {
-                return await this.getVerseData(m.bookIndex, m.chapterIndex, m.verseIndex + verseOffset);
+            if (vIndex + verseIndexOffset >= 0) {
+                return await this.getVerseData(m.bookIndex, m.chapterIndex, vIndex + verseIndexOffset);
             }
 
             if (m.chapterIndex > 0) {
-                const ch = await this.getChapterData(m.bookIndex, m.chapterIndex - 1);
-                const vCount = ch.verseCount;
-                return await this.getVerseData(m.bookIndex, m.chapterIndex - 1, vCount - 1);
+                const chLast = await this.getChapterData(m.bookIndex, m.chapterIndex - 1);
+                const vCountLast = chLast.verseData.length;
+                return await this.getVerseData(m.bookIndex, m.chapterIndex - 1, vCountLast - 1);
             }
 
             console.warn('getVerseDataAtOffset: Past beginning of book');
@@ -337,20 +335,17 @@ export class BibleStoreClass extends StoreBase {
         const ch = this._bibleData.books[bookIndex].chapters[chapterIndex];
 
         // Add Chapter ID
-        ch.c = '' + (chapterIndex + 1);
-
-        const vLast = ch && ch.verses[ch.verses.length - 1];
-        ch.verseCount = vLast && 1 * ((vLast.vEnd || vLast.v) as any);
+        ch.c = (chapterIndex + 1);
+        ch.verseData.forEach(x => x.vLabel = x.vStart === x.vEnd ? `${x.vStart}` : `${x.vStart}-${x.vEnd}`);
         return ch;
     }
 
     private getVerseData = async (bookIndex: number, chapterIndex: number, verseIndex: number) => {
 
         const chData = await this.getChapterData(bookIndex, chapterIndex);
-        const vData = chData.verses[verseIndex];
+        const vData = chData.verseData[verseIndex];
 
-        // Add Chapter ID
-        vData.c = '' + (chapterIndex + 1);
+        vData.c = (chapterIndex + 1);
         return vData;
     }
 

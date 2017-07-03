@@ -11,7 +11,7 @@ export function asyncIt<T>(call: (serviceCallback: (error: StorageError, result:
                 // const stackTrace2 = stackTraceCaller;
                 // console.log('asyncIt', stackTrace2);
 
-                if (error) { reject(error); }
+                if (error) { reject(error); return; }
                 resolve(result);
             });
         } catch (err) {

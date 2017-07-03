@@ -1,4 +1,4 @@
-import { PassagePartChoice, PassagePart, VerseData} from "./types";
+import { PassagePartChoice, PassagePart, VerseData, VerseParagraph } from "./types";
 
 const MIN_CHOICE_SPACING = 2;
 const MAX_CHOICE_SPACING = 5;
@@ -14,27 +14,55 @@ export class PassagePartsGenerator {
     private _nextKey = 0;
 
     createParts(verseData: VerseData, shouldMakeChoices = true): PassagePart[] {
-        if (!verseData || !verseData.text.length) { return []; }
+        if (!verseData || !verseData.p.length) { return []; }
 
-        let parts: PassagePart[] = [];
+        const parts: PassagePart[] = [];
 
-        if (verseData.v === "1") {
-            parts.push({
-                _key: '' + this._nextKey++,
-                kind: 'chapterMarker',
-                isActive: false,
-                text: verseData.c
-            });
-        }
-
-        parts.push({
-            _key: '' + this._nextKey++,
-            kind: 'verseMarker',
-            isActive: false,
-            text: verseData.v
+        verseData.p.forEach(x => {
+            parts.push(...this.createParts_paragraph(x));
         });
 
-        const words = verseData.text
+        return parts;
+    }
+
+    createParts_paragraph(verseParagraph: VerseParagraph, shouldMakeChoices = true): PassagePart[] {
+        if (!verseParagraph || !verseParagraph.x) { return []; }
+
+        if (verseParagraph.k === 'h') {
+            return [{
+                _key: '' + this._nextKey++,
+                kind: 'header',
+                text: verseParagraph.x.map(x => x.t).join(' '),
+            }];
+        }
+
+        const parts: PassagePart[] = [];
+
+        for (let c of verseParagraph.x) {
+            if (c.k === 'v') {
+                if (c.t.match(/(1|1-)/)) {
+                    // Add Chapter Marker Also
+                    parts.push({
+                        _key: '' + this._nextKey++,
+                        kind: 'chapterMarker',
+                        text: '' + verseParagraph.x,
+                    });
+                }
+                parts.push({
+                    _key: '' + this._nextKey++,
+                    kind: 'verseMarker',
+                    text: c.t,
+                });
+            } else {
+                parts.push(...this.createParts_text(c.t));
+            }
+        }
+
+        return parts;
+    }
+
+    createParts_text(text: string, shouldMakeChoices = true): PassagePart[] {
+        const words = text
             .replace(/\n/g, ' \n ')
             .replace(/ +/g, ' ')
 
@@ -47,7 +75,6 @@ export class PassagePartsGenerator {
         let wordParts: PassagePart[] = words.map(w => ({
             _key: '' + this._nextKey++,
             kind: w.indexOf('\n') >= 0 ? 'lineBreak' : 'text' as 'lineBreak' | 'text',
-            isActive: false,
             text: w
         }));
 
@@ -68,7 +95,6 @@ export class PassagePartsGenerator {
                 const part: PassagePart = {
                     _key: '' + this._nextKey++,
                     kind: 'choice',
-                    isActive: false,
                     text: p.text,
                     correctChoice: choices.filter(c => c.text == p.text)[0],
                     choices: choices
@@ -78,9 +104,7 @@ export class PassagePartsGenerator {
             });
         }
 
-        parts = parts.concat(wordParts);
-
-        return parts;
+        return wordParts;
     }
 }
 

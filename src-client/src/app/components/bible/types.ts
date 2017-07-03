@@ -6,8 +6,8 @@ export interface Passage {
 }
 
 export interface PassagePart {
-    kind: 'lineBreak' | 'chapterMarker' | 'verseMarker' | 'text' | 'choice';
-    isActive: boolean;
+    kind: 'lineBreak' | 'chapterMarker' | 'verseMarker' | 'text' | 'choice' | 'header';
+    isActive?: boolean;
 
     text: string;
     choices?: PassagePartChoice[];
@@ -76,16 +76,38 @@ export interface BookData {
 }
 
 export interface ChapterData {
-    c: string;
-    verses: VerseData[];
-    verseCount?: number;
+    // Chapter
+    c: number;
+    verseData: VerseData[];
 }
 
 export interface VerseData {
-    c: string;
-    v: string;
-    vEnd?: string;
-    text: string;
+    // Chapter
+    c: number;
+    // Verse Start
+    vStart: number;
+    // Verse End
+    vEnd: number;
+    vLabel?: string;
+    p: VerseParagraph[];
+}
+
+export interface VerseParagraph {
+    // Kind: null == default
+    // h = Header
+    // q1 = Poetry Indent 1
+    // q2 = Poetry Indent 2
+    // br = Blank Line
+    k?: '' | 'h' | 'q1' | 'q2' | 'b';
+    x: VerseContent[];
+}
+
+export interface VerseContent {
+    // Text
+    t: string;
+    // Kind: null == default
+    // v = Verse Number
+    k?: '' | 'v';
 }
 
 export interface WordStats {
