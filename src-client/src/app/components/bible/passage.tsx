@@ -248,15 +248,29 @@ export class PassageChoicesViewer extends RX.Component<{
             });
 
             // Shift animation
-            const shiftAnimation = RX.Animated.timing(this._animatedTranslateValue, {
-                toValue: -(i - 1) * sizes.choiceHeight,
-                duration: 1000,
-                easing: RX.Animated.Easing.InOut(),
-            });
+            if (this.props.part.choices.length === 1) {
 
-            setTimeout(() => {
-                shiftAnimation.start();
-            });
+            } else if (this.props.part.choices.length === 2) {
+                const shiftAnimation = RX.Animated.timing(this._animatedTranslateValue, {
+                    toValue: (i === 0 ? 1 : -1) * sizes.choiceHeight * 0.5,
+                    duration: 1000,
+                    easing: RX.Animated.Easing.InOut(),
+                });
+
+                setTimeout(() => {
+                    shiftAnimation.start();
+                });
+            } else {
+                const shiftAnimation = RX.Animated.timing(this._animatedTranslateValue, {
+                    toValue: -(i - 1) * sizes.choiceHeight,
+                    duration: 1000,
+                    easing: RX.Animated.Easing.InOut(),
+                });
+
+                setTimeout(() => {
+                    shiftAnimation.start();
+                });
+            }
 
             this.props.onPartDone();
 
