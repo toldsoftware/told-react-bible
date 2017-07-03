@@ -105,6 +105,8 @@ export interface VerseParagraph {
 export interface VerseContent {
     // Text
     t: string;
+    vStart?: number;
+    vEnd?: number;
     // Kind: null == default
     // v = Verse Number
     k?: '' | 'verse';

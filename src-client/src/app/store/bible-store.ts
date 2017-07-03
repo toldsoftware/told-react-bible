@@ -112,7 +112,7 @@ export class BibleStoreClass extends StoreBase {
         const m = this.getPassageMetadata_inner();
         const b = m && this._bibleData && this._bibleData.books[m.bookIndex];
         const ch = b && b.chapters[m.chapterIndex];
-        return ch && ch.verseData.map(x => x.vLabel);
+        return ch && ch.verseData.map(x => x.vLabel) || [];
     }
 
     private getPassageMetadata_async = async () => {
@@ -272,7 +272,8 @@ export class BibleStoreClass extends StoreBase {
     private getVerseDataAtOffset = async (verseIndexOffset: number) => {
         const m = await this.getPassageMetadata_async();
         const ch = await this.getChapterData(m.bookIndex, m.chapterIndex);
-        const vIndex = ch.verseData.map((x, i) => ({ x, i })).filter(x => x.x.vLabel === m.verseLabel)[0].i;
+        const vd = ch.verseData.map((x, i) => ({ x, i })).filter(x => x.x.vLabel === m.verseLabel);
+        const vIndex = vd && vd.length && vd[0].i || 0;
 
         console.log('getVerseDataAtOffset START', { getPassageMetadata: m });
 
