@@ -164,12 +164,12 @@ export class BibleStoreClass extends StoreBase {
         this.reloadPassage();
     };
 
-    changeChoiceKind = (choiceKind:ChoiceKind) =>{
+    changeChoiceKind = (choiceKind: ChoiceKind) => {
         this._choiceKind = choiceKind;
         this.trigger();
     }
 
-    
+
     @autoSubscribe
     getChoiceKind() {
         return this._choiceKind;
@@ -236,6 +236,16 @@ export class BibleStoreClass extends StoreBase {
 
         const vPrev = await this.getVerseDataAtOffset(-1);
         const vActive = await this.getVerseDataAtOffset(0);
+
+        // Go ahead and show this while loading the nextParts
+        this._passage = {
+            previousParts: this._passageGenerator.createParts(vPrev, false),
+            activeParts: this._passageGenerator.createParts(vActive, true),
+            nextParts: [], // this._passageGenerator.createParts(vNext, true)
+        };
+
+        this.trigger();
+
         const vNext = await this.getVerseDataAtOffset(1);
 
         this._selectedVerseLabel = this._selectedVerseLabel || vActive.vLabel;
@@ -263,12 +273,21 @@ export class BibleStoreClass extends StoreBase {
             return;
         }
 
+        this._passage = {
+            previousParts: [...this._passage.previousParts, ...this._passage.activeParts],
+            activeParts: [...this._passage.nextParts],
+            nextParts: [],
+        };
+
+        this.trigger();
+
+        // Load Next
         this._selectedVerseLabel = selectedVerseLabel;
         this._selectedChapterNumber = selectedChapterNumber;
         const nextVerseData = await this.getVerseDataAtOffset(1);
         this._passage = {
-            previousParts: [...this._passage.previousParts, ...this._passage.activeParts],
-            activeParts: [...this._passage.nextParts],
+            previousParts: this._passage.previousParts,
+            activeParts: this._passage.activeParts,
             nextParts: this._passageGenerator.createParts(nextVerseData, true)
         };
 
