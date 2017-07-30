@@ -138,22 +138,23 @@ export class PassagePartsGenerator {
 function getChoices(correct: string, altWords: string[]): PassagePartChoice[] {
 
     let choices = [correct];
-    const simple = [simplify(correct)];
+    const sCorrect = simplify(correct);
+    const sChoices = [sCorrect];
 
     let attempts = 0;
     while (attempts < 10 && choices.length < TARGET_COUNT) {
 
-        const c = altWords[Math.floor(altWords.length * Math.random())];
-        const s = simplify(c);
+        const choice = altWords[Math.floor(altWords.length * Math.random())];
+        const sChoice = simplify(choice);
 
-        if (s.length > 0
-            // Doesn't contain the correct choice
-            && simple.indexOf(s) < 0
+        if (sChoice.length > 0
+            // Doesn't contain this choice already
+            && sChoices.indexOf(sChoice) < 0
             // Doesn't start with same letter
-            && simple[0] !== s[0]
+            && sCorrect[0] !== sChoice[0]
         ) {
-            choices.push(c);
-            simple.push(s);
+            choices.push(choice);
+            sChoices.push(sChoice);
         }
 
         attempts++;
