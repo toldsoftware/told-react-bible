@@ -3,7 +3,7 @@ import { Debug } from '../utils/debug';
 import { SimpleComponentBase } from '../simple-component-base';
 
 let __nextId = 0;
-export class AnimView extends SimpleComponentBase<{ shouldAnimateOnLoad?: boolean, shouldAnimateKey?: any, style?: RX.Types.ViewStyle }> {
+export class AnimView extends SimpleComponentBase<{ shouldAnimateOnLoad?: boolean, shouldAnimateKey?: any, style?: RX.Types.StyleRuleSet<RX.Types.ViewStyle> }> {
 
     private _in_animScaleValue = new RX.Animated.Value(1);
     private _in_animTiming = RX.Animated.timing(this._in_animScaleValue,

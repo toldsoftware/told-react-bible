@@ -2,7 +2,7 @@ import { SimpleComponentBase } from '../simple-component-base';
 import * as RX from 'reactxp';
 import { getSize } from "./sized-image-common";
 
-export class SizedImage extends SimpleComponentBase<{ source: string, style: RX.Types.ImageStyle, maxWidth: number }, { width: number, height: number }>{
+export class SizedImage extends SimpleComponentBase<{ source: string, style: RX.Types.StyleRuleSet<RX.Types.ImageStyle>, maxWidth: number }, { width: number, height: number }>{
 
     onImageLoad = () => {
         const img = this.refs['img'] as RX.Image;

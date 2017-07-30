@@ -17,12 +17,14 @@ export const InteractPage = (props: { store: Store }) => (
 
 export const InteractView = (props: { store: Store }) => storeComp(() => ({
     passage: props.store.bibleStore.getPassage(),
+    choiceKind: props.store.bibleStore.getChoiceKind(),
+    changeChoiceKind: props.store.bibleStore.changeChoiceKind,
 }), (state) => {
     // console.log('InteractView  RENDER', { state, passage: state.passage, active: state.passage.activeParts });
     return (
         <RX.View>
             <PassageChooser bibleStore={props.store.bibleStore} />
-            <PassageViewer passage={state.passage} onPartDone={props.store.bibleStore.completePart} />
+            <PassageViewer passage={state.passage} choiceKind={state.choiceKind} onChoiceKindChange={state.changeChoiceKind} onPartDone={props.store.bibleStore.completePart} />
         </RX.View>
     );
 });

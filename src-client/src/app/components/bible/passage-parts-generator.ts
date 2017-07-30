@@ -1,4 +1,8 @@
 import { PassagePartChoice, PassagePart, VerseData, VerseParagraph } from "./types";
+import { unique_values } from '@told/stack/src/core/utils/objects';
+
+// const MIN_CHOICE_SPACING = 1;
+// const MAX_CHOICE_SPACING = 1;
 
 const MIN_CHOICE_SPACING = 2;
 const MAX_CHOICE_SPACING = 5;
@@ -12,6 +16,17 @@ export class PassagePartsGenerator {
 
     private _iToChoice = MIN_CHOICE_SPACING + Math.ceil((MAX_CHOICE_SPACING - MIN_CHOICE_SPACING) * Math.random());
     private _nextKey = 0;
+    private _altWords: string[] = [];
+    private _addCount = 0;
+
+    private addAltWords(words: string[]) {
+        this._altWords.push(...words);
+        this._addCount++;
+
+        if (this._addCount % 100 === 0) {
+            this._altWords = unique_values(this._altWords);
+        }
+    }
 
     createParts(verseData: VerseData, shouldMakeChoices = true): PassagePart[] {
         if (!verseData || !verseData.p.length) { return []; }
@@ -88,7 +103,11 @@ export class PassagePartsGenerator {
 
         // Convert some words to choices
         if (shouldMakeChoices) {
-            const altWords = wordParts.map(w => w.text);
+
+            // Add all words as options
+            const altWords_local = wordParts.map(w => w.text);
+            this.addAltWords(altWords_local);
+            const altWords = this._altWords;
 
             wordParts = wordParts.map(p => {
                 if (p.text.trim().length <= 0) { return p; }
@@ -127,7 +146,12 @@ function getChoices(correct: string, altWords: string[]): PassagePartChoice[] {
         const c = altWords[Math.floor(altWords.length * Math.random())];
         const s = simplify(c);
 
-        if (s.length > 0 && simple.indexOf(s) < 0) {
+        if (s.length > 0
+            // Doesn't contain the correct choice
+            && simple.indexOf(s) < 0
+            // Doesn't start with same letter
+            && simple[0] !== s[0]
+        ) {
             choices.push(c);
             simple.push(s);
         }

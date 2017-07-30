@@ -6,10 +6,11 @@ export function storeComp<S>(buildStateCallback: () => S, renderCallback: (state
     return <StoreComponentBase buildStateCallback={buildStateCallback} renderCallback={renderCallback} />;
 };
 
+// BUG with Resub types?
 class StoreComponentBase extends ComponentBase<{
     buildStateCallback: () => any,
     renderCallback: (state: any) => JSX.Element | null
-}, any> {
+} & any, any> {
 
     protected _buildState(props: {}, initialBuild: boolean): any {
         const s = this.props.buildStateCallback();

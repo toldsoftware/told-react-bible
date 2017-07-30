@@ -4,6 +4,9 @@ import { Passage, PassagePart, PassagePartChoice } from "./types";
 const colors = {
     back_viewer: '#FFFFFF',
 
+    back_options: '#32db64',
+    text_options: '#000000',
+
     text_marker: '#387ef5',
 
     back_choice: '#387ef5',
@@ -37,6 +40,11 @@ const styles = {
         opacity: 0.75,
     }),
 
+    row: RX.Styles.createViewStyle({
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 8,
+    }),
     viewer: RX.Styles.createViewStyle({
 
     }),
@@ -141,11 +149,33 @@ const styles = {
 
         opacity: 0.1,
     }),
+    width_placeholder: RX.Styles.createTextStyle({
+        margin: 0,
+        height: 1,
+        padding: sizes.choice_padding,
+        fontSize: 16,
+        textAlign: 'center',
+        color: colors.back_viewer,
+        backgroundColor: colors.back_viewer,
+    }),
+
+    picker: RX.Styles.createPickerStyle({
+        flex: 1,
+        margin: 4,
+        padding: 4,
+    }),
+
+    options_view: RX.Styles.createViewStyle({
+        backgroundColor: colors.back_options,
+    }),
+    options_text: RX.Styles.createTextStyle({
+        color: colors.text_options,
+    }),
 };
 
 
 
-export const PassageViewer = (props: { passage: Passage, onPartDone: (part: PassagePart) => void }) => {
+export const PassageViewer = (props: { passage: Passage, choiceKind: ChoiceKind, onChoiceKindChange: (value: ChoiceKind) => void, onPartDone: (part: PassagePart) => void }) => {
 
     const allParts = [
         ...props.passage.previousParts.map(x => ({ isActive: false, part: x, onPartDone: null })),
@@ -165,12 +195,13 @@ export const PassageViewer = (props: { passage: Passage, onPartDone: (part: Pass
 
     return (
         <RX.View style={styles.viewer}>
+            <ChoiceKindSelector value={props.choiceKind} onChange={props.onChoiceKindChange} />
             {paragraphs.map(c => (
                 <RX.View style={styles.paragraph}>
                     {
                         c.map(x => (
                             <RX.View key={x.part._key} style={x.isActive ? styles.active : styles.inactive}>
-                                <PassagePartViewer part={x.part} onPartDone={x.onPartDone} />
+                                <PassagePartViewer part={x.part} choiceKind={props.choiceKind} onPartDone={x.onPartDone} />
                             </RX.View>
                         ))
                     }
@@ -190,19 +221,33 @@ export const PassageViewer = (props: { passage: Passage, onPartDone: (part: Pass
     // );
 };
 
-export const PassagePartViewer = (props: { key?: string, part: PassagePart, onPartDone?: () => void }) => {
+export const ChoiceKindSelector = (props: { value: ChoiceKind, onChange?: (value: ChoiceKind) => void }) => (
+    <RX.View style={[styles.row, styles.options_view]}>
+        {/* <RX.Text style={styles.options_text} >Difficulty</RX.Text> */}
+        <RX.Picker style={styles.picker} items={[ChoiceKind.Word, ChoiceKind.FirstLetter].map(x => ({ label: x, value: x }))}
+            selectedValue={props.value} onValueChange={props.onChange} />
+    </RX.View>
+)
+
+export const PassagePartViewer = (props: { key?: string, part: PassagePart, choiceKind: ChoiceKind, onPartDone?: () => void }) => {
     // return (<RX.Text style={styles.textPart}>{props.part.kind} {props.part.text}</RX.Text>);
     switch (props.part.kind) {
         case 'chapterMarker': return (<RX.Text style={styles.chapterMarker}>{props.part.text}</RX.Text>);
         case 'verseMarker': return (<RX.Text style={styles.verseMarker}>{props.part.text}</RX.Text>);
         case 'heading': return (<RX.Text style={styles.heading}>{props.part.text}</RX.Text>);
-        case 'choice': return (<PassageChoicesViewer part={props.part} onPartDone={props.onPartDone} />);
+        case 'choice': return (<PassageChoicesViewer part={props.part} choiceKind={props.choiceKind} onPartDone={props.onPartDone} />);
         case 'text': default: return (<RX.View style={styles.textPart_view}><RX.Text style={styles.textPart}>{props.part.text}</RX.Text></RX.View>);
     }
 };
 
+export enum ChoiceKind {
+    Word = 'Word',
+    FirstLetter = 'First Letter',
+}
+
 export class PassageChoicesViewer extends RX.Component<{
     part: PassagePart,
+    choiceKind: ChoiceKind,
     onPartDone?: () => void
 }, {
         wasDone?: boolean,
@@ -291,18 +336,22 @@ export class PassageChoicesViewer extends RX.Component<{
     render() {
         this.initState();
 
+        const choiceKind = this.state.choiceStates.every(x => !x.isWrong) && this.props.choiceKind || ChoiceKind.Word;
+
         if (!this.state.wasDone) {
             return (
                 <RX.View style={styles.choicesPart_wrapper}>
                     <RX.Animated.View style={[styles.choicesPart, this._shiftStyle]}>
+                        <WidthPlaceholder items={this.props.part.choices.map(x => x.text)} />
                         {this.props.part.choices.map((x, i) => {
                             const s = this.state.choiceStates[i];
                             return (
                                 <RX.View style={styles.choice}>
-                                    <PassageChoiceViewer part={x} {...s} onPress={() => this.selectChoice(i)} hasOnPartDoneHandler={!!this.props.onPartDone} />
+                                    <PassageChoiceViewer part={x} choiceKind={choiceKind} {...s} onPress={() => this.selectChoice(i)} hasOnPartDoneHandler={!!this.props.onPartDone} />
                                 </RX.View>
                             );
                         })}
+                        <WidthPlaceholder items={this.props.part.choices.map(x => x.text)} />
                     </RX.Animated.View>
                 </RX.View>
             );
@@ -312,9 +361,11 @@ export class PassageChoicesViewer extends RX.Component<{
             return (
                 <RX.View style={styles.choicesPart_wrapper}>
                     <RX.View style={styles.choicesPart}>
+                        <WidthPlaceholder items={this.props.part.choices.map(x => x.text)} />
                         <RX.View style={styles.choice}>
-                            <PassageChoiceViewer part={x} {...s} />
+                            <PassageChoiceViewer part={x} choiceKind={choiceKind} {...s} />
                         </RX.View>
+                        <WidthPlaceholder items={this.props.part.choices.map(x => x.text)} />
                     </RX.View>
                 </RX.View>
             );
@@ -322,21 +373,40 @@ export class PassageChoicesViewer extends RX.Component<{
     }
 }
 
-export const PassageChoiceViewer = (props: { part: PassagePartChoice, isCorrect: boolean, isWrong: boolean, isCollapsed: boolean, onPress?: () => void, hasOnPartDoneHandler?: boolean }) => {
+export const PassageChoiceViewer = (props: { part: PassagePartChoice, isCorrect: boolean, isWrong: boolean, isCollapsed: boolean, choiceKind: ChoiceKind, onPress?: () => void, hasOnPartDoneHandler?: boolean }) => {
+    const textRaw = props.part.text;
+    let text = props.part.text;
+
+    // Choice Kind
+    if (props.choiceKind === ChoiceKind.FirstLetter) {
+        let i = 0;
+        do {
+            i++;
+            text = textRaw.substr(0, i) + textRaw.substr(i).replace(/./g, '_');
+        } while (!text.match(/(?!_)\w/) && i < textRaw.length);
+    }
+
     if (props.isCorrect) {
-        return <RX.Text style={styles.choice_correct}>{props.part.text}</RX.Text>
+        return <RX.Text style={styles.choice_correct}>{textRaw}</RX.Text>
     } else if (props.isCollapsed && props.isWrong) {
-        return <RX.Text style={[styles.choice_collapsed, styles.choice_wrong]}>{props.part.text}</RX.Text>
+        return <RX.Text style={[styles.choice_collapsed, styles.choice_wrong]}>{text}</RX.Text>
     } else if (props.isCollapsed) {
-        return <RX.Text style={styles.choice_collapsed}>{props.part.text}</RX.Text>
+        return <RX.Text style={styles.choice_collapsed}>{text}</RX.Text>
     } else if (props.isWrong) {
-        return <RX.Text style={styles.choice_wrong}>{props.part.text}</RX.Text>
+        return <RX.Text style={styles.choice_wrong}>{text}</RX.Text>
     } else if (props.hasOnPartDoneHandler) {
-        return <RX.Button style={styles.choice_default} onPress={props.onPress}>{props.part.text}</RX.Button>
+        return <RX.Button style={styles.choice_default} onPress={props.onPress}>{text}</RX.Button>
     } else {
-        return <RX.Text style={styles.choice_disabled}>{props.part.text}</RX.Text>
+        return <RX.Text style={styles.choice_disabled}>{text}</RX.Text>
     }
 }
+
+export const WidthPlaceholder = (props: { items: string[] }) => {
+    const maxText = props.items.sort((a, b) => a.length - b.length)[0].replace(/./g, '&nbsp;') + '';
+    return (
+        <RX.Text style={styles.width_placeholder}>{maxText}</RX.Text>
+    )
+};
 
 //   <div *ngFor="let part of verseParts" class="versePart" [style.color]="part.color" [class.isActiveVersePart]="part.isActive"
 //     [class.isNonActiveVersePart]="!part.isActive" [class.lineBreak]="part.isLineBreak">

@@ -7,6 +7,7 @@ import { PassagePartsGenerator } from "../components/bible/passage-parts-generat
 import { downloadBibleChapterData, downloadBibleMetadata } from "../server-access/bible-data";
 import { bibleVersions } from "../server-access/bible-data-versions";
 import { delay } from "./helpers";
+import { ChoiceKind } from "../components/bible/passage";
 
 @AutoSubscribeStore
 export class BibleStoreClass extends StoreBase {
@@ -42,6 +43,9 @@ export class BibleStoreClass extends StoreBase {
 
     @autoDeviceStorage(null, 'Bible')
     _selectedVerseLabel: string;
+
+    @autoDeviceStorage(null, 'Bible')
+    _choiceKind: ChoiceKind;
 
     _passage: Passage;
 
@@ -159,6 +163,17 @@ export class BibleStoreClass extends StoreBase {
         this._selectedVerseLabel = verseLabel;
         this.reloadPassage();
     };
+
+    changeChoiceKind = (choiceKind:ChoiceKind) =>{
+        this._choiceKind = choiceKind;
+        this.trigger();
+    }
+
+    
+    @autoSubscribe
+    getChoiceKind() {
+        return this._choiceKind;
+    }
 
     @autoSubscribe
     getPassage() {
