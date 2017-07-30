@@ -6,6 +6,7 @@ import { styles } from "../../styles";
 import { PassageViewer } from "../bible/passage";
 import { BibleStore } from "../../store/bible-store";
 import { PassageChooser } from "../bible/passage-chooser";
+import { PassageOptions } from "../bible/passage-options";
 
 export const InteractPage = (props: { store: Store }) => (
     <PageLayout store={props.store} postsStore={props.store.bibleStore} shouldHideTabBar={true}>
@@ -18,13 +19,13 @@ export const InteractPage = (props: { store: Store }) => (
 export const InteractView = (props: { store: Store }) => storeComp(() => ({
     passage: props.store.bibleStore.getPassage(),
     choiceKind: props.store.bibleStore.getChoiceKind(),
-    changeChoiceKind: props.store.bibleStore.changeChoiceKind,
 }), (state) => {
     // console.log('InteractView  RENDER', { state, passage: state.passage, active: state.passage.activeParts });
     return (
         <RX.View>
             <PassageChooser bibleStore={props.store.bibleStore} />
-            <PassageViewer passage={state.passage} choiceKind={state.choiceKind} onChoiceKindChange={state.changeChoiceKind} onPartDone={props.store.bibleStore.completePart} />
+            <PassageOptions bibleStore={props.store.bibleStore} />
+            <PassageViewer passage={state.passage} choiceKind={state.choiceKind} onPartDone={props.store.bibleStore.completePart} />
         </RX.View>
     );
 });

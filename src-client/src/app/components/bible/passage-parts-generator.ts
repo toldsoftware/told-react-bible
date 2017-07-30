@@ -4,17 +4,26 @@ import { unique_values } from '@told/stack/src/core/utils/objects';
 // const MIN_CHOICE_SPACING = 1;
 // const MAX_CHOICE_SPACING = 1;
 
-const MIN_CHOICE_SPACING = 2;
-const MAX_CHOICE_SPACING = 5;
-const TARGET_COUNT = 3;
+
+const TARGET_CHOICE_COUNT = 3;
 
 export class PassagePartsGenerator {
+
+    private _spacing_min = 2;
+    private _spacing_max = 5;
 
     constructor() {
 
     }
 
-    private _iToChoice = MIN_CHOICE_SPACING + Math.ceil((MAX_CHOICE_SPACING - MIN_CHOICE_SPACING) * Math.random());
+    setSpacing(min: number, max: number) {
+        this._spacing_min = min > 0 ? min : 1;
+        this._spacing_max = max >= this._spacing_min ? max : this._spacing_min;
+
+        this._iToChoice = this._spacing_min + Math.ceil((this._spacing_max - this._spacing_min) * Math.random());
+    }
+
+    private _iToChoice = this._spacing_min + Math.ceil((this._spacing_max - this._spacing_min) * Math.random());
     private _nextKey = 0;
     private _altWords: string[] = [];
     private _addCount = 0;
@@ -116,7 +125,7 @@ export class PassagePartsGenerator {
                 this._iToChoice--;
                 if (this._iToChoice > 0) { return p; }
 
-                this._iToChoice = MIN_CHOICE_SPACING + Math.ceil((MAX_CHOICE_SPACING - MIN_CHOICE_SPACING) * Math.random());
+                this._iToChoice = this._spacing_min + Math.ceil((this._spacing_max - this._spacing_min) * Math.random());
 
                 const choices = getChoices(p.text, altWords);
                 const part: PassagePart = {
@@ -142,7 +151,7 @@ function getChoices(correct: string, altWords: string[]): PassagePartChoice[] {
     const sChoices = [sCorrect];
 
     let attempts = 0;
-    while (attempts < 10 && choices.length < TARGET_COUNT) {
+    while (attempts < 10 && choices.length < TARGET_CHOICE_COUNT) {
 
         const choice = altWords[Math.floor(altWords.length * Math.random())];
         const sChoice = simplify(choice);

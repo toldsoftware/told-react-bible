@@ -1,11 +1,9 @@
 import * as RX from 'reactxp';
 import { Passage, PassagePart, PassagePartChoice } from "./types";
+import { ChoiceKind } from "./passage-options";
 
 const colors = {
     back_viewer: '#FFFFFF',
-
-    back_options: '#32db64',
-    text_options: '#000000',
 
     text_marker: '#387ef5',
 
@@ -40,11 +38,6 @@ const styles = {
         opacity: 0.75,
     }),
 
-    row: RX.Styles.createViewStyle({
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 8,
-    }),
     viewer: RX.Styles.createViewStyle({
 
     }),
@@ -158,24 +151,9 @@ const styles = {
         color: colors.back_viewer,
         backgroundColor: colors.back_viewer,
     }),
-
-    picker: RX.Styles.createPickerStyle({
-        flex: 1,
-        margin: 4,
-        padding: 4,
-    }),
-
-    options_view: RX.Styles.createViewStyle({
-        backgroundColor: colors.back_options,
-    }),
-    options_text: RX.Styles.createTextStyle({
-        color: colors.text_options,
-    }),
 };
 
-
-
-export const PassageViewer = (props: { passage: Passage, choiceKind: ChoiceKind, onChoiceKindChange: (value: ChoiceKind) => void, onPartDone: (part: PassagePart) => void }) => {
+export const PassageViewer = (props: { passage: Passage, choiceKind: ChoiceKind, onPartDone: (part: PassagePart) => void }) => {
 
     const allParts = [
         ...props.passage.previousParts.map(x => ({ isActive: false, part: x, onPartDone: null })),
@@ -195,7 +173,6 @@ export const PassageViewer = (props: { passage: Passage, choiceKind: ChoiceKind,
 
     return (
         <RX.View style={styles.viewer}>
-            <ChoiceKindSelector value={props.choiceKind} onChange={props.onChoiceKindChange} />
             {paragraphs.map(c => (
                 <RX.View style={styles.paragraph}>
                     {
@@ -221,14 +198,6 @@ export const PassageViewer = (props: { passage: Passage, choiceKind: ChoiceKind,
     // );
 };
 
-export const ChoiceKindSelector = (props: { value: ChoiceKind, onChange?: (value: ChoiceKind) => void }) => (
-    <RX.View style={[styles.row, styles.options_view]}>
-        {/* <RX.Text style={styles.options_text} >Difficulty</RX.Text> */}
-        <RX.Picker style={styles.picker} items={[ChoiceKind.Word, ChoiceKind.FirstLetter].map(x => ({ label: x, value: x }))}
-            selectedValue={props.value} onValueChange={props.onChange} />
-    </RX.View>
-)
-
 export const PassagePartViewer = (props: { key?: string, part: PassagePart, choiceKind: ChoiceKind, onPartDone?: () => void }) => {
     // return (<RX.Text style={styles.textPart}>{props.part.kind} {props.part.text}</RX.Text>);
     switch (props.part.kind) {
@@ -239,11 +208,6 @@ export const PassagePartViewer = (props: { key?: string, part: PassagePart, choi
         case 'text': default: return (<RX.View style={styles.textPart_view}><RX.Text style={styles.textPart}>{props.part.text}</RX.Text></RX.View>);
     }
 };
-
-export enum ChoiceKind {
-    Word = 'Word',
-    FirstLetter = 'First Letter',
-}
 
 export class PassageChoicesViewer extends RX.Component<{
     part: PassagePart,

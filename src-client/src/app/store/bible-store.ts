@@ -7,10 +7,11 @@ import { PassagePartsGenerator } from "../components/bible/passage-parts-generat
 import { downloadBibleChapterData, downloadBibleMetadata } from "../server-access/bible-data";
 import { bibleVersions } from "../server-access/bible-data-versions";
 import { delay } from "./helpers";
-import { ChoiceKind } from "../components/bible/passage";
+import { ChoiceKind, ChoiceSpacing } from "../components/bible/passage-options";
 
 @AutoSubscribeStore
 export class BibleStoreClass extends StoreBase {
+    private _passageGenerator = new PassagePartsGenerator();
 
     _isLoading = false;
     // TODO: Download Metadata and Data
@@ -46,6 +47,9 @@ export class BibleStoreClass extends StoreBase {
 
     @autoDeviceStorage(null, 'Bible')
     _choiceKind: ChoiceKind;
+
+    @autoDeviceStorage(null, 'Bible')
+    _choiceSpacing: ChoiceSpacing;
 
     _passage: Passage;
 
@@ -164,15 +168,39 @@ export class BibleStoreClass extends StoreBase {
         this.reloadPassage();
     };
 
+    // Options
     changeChoiceKind = (choiceKind: ChoiceKind) => {
         this._choiceKind = choiceKind;
         this.trigger();
     }
 
-
     @autoSubscribe
     getChoiceKind() {
         return this._choiceKind;
+    }
+
+    changeChoiceSpacing = (choiceSpacing: ChoiceSpacing) => {
+        this._choiceSpacing = choiceSpacing;
+        switch (choiceSpacing) {
+            case ChoiceSpacing.EveryWord:
+                this._passageGenerator.setSpacing(1, 1);
+                break;
+            case ChoiceSpacing.ShortSpacing:
+                this._passageGenerator.setSpacing(1, 3);
+                break;
+            case ChoiceSpacing.MediumSpacing:
+                this._passageGenerator.setSpacing(2, 5);
+                break;
+            case ChoiceSpacing.LongSpacing:
+                this._passageGenerator.setSpacing(3, 7);
+                break;
+        }
+        this.reloadPassage();
+    }
+
+    @autoSubscribe
+    getChoiceSpacing() {
+        return this._choiceSpacing;
     }
 
     @autoSubscribe
@@ -221,7 +249,6 @@ export class BibleStoreClass extends StoreBase {
         console.log('completePart END', { part, _passage: this._passage });
     };
 
-    private _passageGenerator = new PassagePartsGenerator();
 
     private generatePassage = async () => {
         console.log('generatePassage START', { _passage: this._passage });
